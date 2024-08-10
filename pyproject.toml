@@ -1,0 +1,112 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "neverwhere"
+version = "0.0.1-rc1"
+description = ""
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.7"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python",
+]
+dependencies = [
+    "params-proto>=2.11.16",
+    "pillow",
+    "msgpack",
+    "numpy>=1.21", # because we require numpy.typing.NDArray
+    "websockets",
+]
+
+[project.optional-dependencies]
+# add the cors package, not needed in pyScript
+all = [
+    "aiohttp",
+    "aiohttp-cors",
+    "killport",
+]
+example = [
+    "aiohttp",
+    "aiohttp-cors",
+    "killport",
+    "open3d>=0.15.0,<0.16.0",
+    "trimesh",
+    "cmx",
+    "functional_notations",
+    "ml_logger",
+    "opencv-python"
+]
+dev = [
+    "aiohttp",
+    "aiohttp-cors",
+    "killport",
+    "black==22.3.0",
+    "pylint==2.13.4",
+    "pytest==7.1.2",
+    "sphinx==7.1.2",
+    "furo",
+    "sphinx_copybutton",
+    "myst_parser",
+    # these are very optional, but needed for the doc site
+    "trimesh",
+    "tqdm",
+]
+
+[project.scripts]
+# Note, add entrypoint name to scripts/completions/install.py to include CLI percentage
+neverwhere = "neverwhere:entrypoint"
+
+[tool.setuptools.packages.find]
+include = ["neverwhere*"]
+
+[tool.setuptools.package-data]
+"*" = ["*.json"]
+
+# black
+[tool.black]
+line-length = 120
+
+# pylint
+[tool.pylint.messages_control]
+max-line-length = 120
+generated-members = []
+good-names-rgxs = "^[_a-zA-Z][_a-z0-9]?$"
+ignore-paths = []
+jobs = 0
+ignored-classes = ["TensorDataclass"]
+
+disable = [
+    "duplicate-code",
+    "fixme",
+    "logging-fstring-interpolation",
+    "too-many-arguments",
+    "too-many-branches",
+    "too-many-instance-attributes",
+    "too-many-locals",
+    "unnecessary-ellipsis",
+]
+
+#pytest
+#[tool.pytest.ini_options]
+#addopts = "-n=4 --typeguard-packages=neverwhere --disable-warnings"
+#testpaths = [
+#    "tests",
+#]
+
+# pyright
+[tool.pyright]
+include = ["neverwhere"]
+exclude = ["**/node_modules", "**/__pycache__", ]
+#ignore = ["nerf_neverwhere"]
+defineConstant = { DEBUG = true }
+
+reportMissingImports = true
+reportMissingTypeStubs = false
+reportPrivateImportUsage = false
+reportUndefinedVariable = false
+
+#pythonVersion = "3.8"
+#pythonPlatform = "Linux"
