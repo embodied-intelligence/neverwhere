@@ -9,6 +9,10 @@ VR and AR ready, and can be run on mobile devices. To get started, just run:
 pip install 'neverwhere[all]=={VERSION}'
 ```
 
+### Setting up Asset Files
+
+
+
 Here is an example that loads a URDF file and displays it in the browser. For a more comprehensive list of examples, please refer to the [examples](examples/01_trimesh) page.
 
 ```python
