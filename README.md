@@ -52,18 +52,28 @@ the [API documentation on Components](https://docs.neverwhere.ai/en/latest/api/n
 For a comprehensive list of data types, please refer to
 the [API documentation on Data Types](https://docs.neverwhere.ai/en/latest/api/types.html).
 
-## Contributing to Documentation and Features
+## How to Develop: Contributing to Documentation and Features
 
-Documentation is a crucial part of the `neverwhere` ecosystem. To contribute to documentation and usage examples, simply:
+Documentation is a crucial part of the `neverwhere` ecosystem.
+
+This repo comes with a autobuild preview of the documentations. You can start it by running the following command and then
+open [http://localhost:8000](http://localhost:8000) in your browser.
+
+```shell
+pip install -e '.[all]'
+make preview
+```
+
+To build the documentation, you can run the following that fires up an http server at the port `8888`. You can view the documentation
+at [http://localhost:8888](http://localhost:8888).
+
+```shell
 
 ```bash
 pip install -e '.[all]'
 make docs
 ```
 
-This should fire up an http server at the port `8888`, and you can view the documentation at `http://localhost:8888`.
-
 ## About Us
 
-neverwhere is built by researchers at MIT and UCSD in fields including robotics, computer vision, and computer graphics.
-
+neverwhere is built by researchers at MIT, USC and UCSD.
