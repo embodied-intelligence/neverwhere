@@ -49,6 +49,7 @@ the [API documentation | neverwhere](https://neverwhere.readthedocs.com/en/lates
    :caption: Learning Setup
    :hidden:
    
+   learning/overview.md
    learning/system.md
    learning/on_policy_supervision.md
 

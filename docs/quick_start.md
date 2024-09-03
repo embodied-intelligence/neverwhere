@@ -38,7 +38,7 @@ For list of environments, refer to [./environments](environments)
 
 ## Developing (Optional)
 
-If you want to develop neverwhere, you can install it in editable mode plus dependencies
+If you want to develop neverwhere, follow the you can install it in editable mode plus dependencies
 relevant for building the documentations:
 
 ```shell
