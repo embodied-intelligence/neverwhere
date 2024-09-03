@@ -12,10 +12,12 @@
     <span class="sidebar-brand-text">{{ docstitle if docstitle else project }}</span>
     {%- endif %} -#} {% endblock brand_content %}
     <!--adding this here-->
-    <span class="sidebar-brand-text" style="display: flex; justify-content: space-between; align-items: baseline;">
-        <code style="font-size: 2.19em; font-style: bold;
+    <span class="sidebar-brand-text" style="display: flex; flex-direction: column; justify-content: space-between; align-items: baseline;">
+        <code style="
+        font-size: 1.19em; font-style: bold;
         background-clip: text; color: transparent;
-        background-image: linear-gradient(to right, rgb(0,140,220), rgb(226,213,79), rgb(210,0,12))">{{ docstitle }}</code>
+        background-image: linear-gradient(to right, rgb(169 178 177), rgb(34 51 52), rgb(202 204 200));
+        ">{{ docstitle }}</code>
         <code style="font-size: 0.7em">v{{ version }}</code>
     </span>
     <!--<span class="sidebar-brand-text" style="display: flex">-->

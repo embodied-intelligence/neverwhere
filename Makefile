@@ -1,8 +1,7 @@
 .PHONY: default wheel dev convert-rst resize update-doc docs prepare-release release publish-no-test publish test
+.ONESHELL:
 
-# shell option to use extended glob from from https://stackoverflow.com/a/6922447/1560241
-SHELL:=/bin/bash -O extglob
-
+PYTHON=`which python`
 VERSION=`< VERSION`
 
 author=$(Ge Yang)
@@ -23,31 +22,22 @@ convert-rst:
 	sed -i '' 's/\.\//https\:\/\/github\.com\/geyang\/neverwhere\/blob\/master\//g' README
 	perl -p -i -e 's/\.(jpg|png|gif)/.$$1?raw=true/' README
 	rst-lint README
-resize: # from https://stackoverflow.com/a/28221795/1560241
-	echo ./figures/!(*resized).jpg
-	convert ./figures/!(*resized).jpg -resize 888x1000 -set filename:f '%t' ./figures/'%[filename:f]_resized.jpg'
-update-doc: convert-rst
-	python setup.py sdist upload
+dev-docs:
+	sphinx-autobuild docs docs/_build/html
 docs:
 	rm -rf docs/_build
 	cd docs && make html
 	cd docs/_build/html && python -m http.server 8888
-prepare-release:
+prepare:
 	-git tag -d v$(VERSION)
 	-git tag -d latest
-release:
+release: prepare
 	git push
 	git tag v$(VERSION) -m '$(msg)'
 	git tag latest
 	git push origin --tags -f
-publish-no-test: convert-rst
-	make wheel
-	twine upload dist/*
 publish: convert-rst
-	make test
 	make wheel
 	twine upload dist/*
 test:
-	pwd && \
 	python -m pytest tests --capture=no
-
