@@ -22,7 +22,7 @@ convert-rst:
 	sed -i '' 's/\.\//https\:\/\/github\.com\/geyang\/neverwhere\/blob\/master\//g' README
 	perl -p -i -e 's/\.(jpg|png|gif)/.$$1?raw=true/' README
 	rst-lint README
-dev-docs:
+preview:
 	sphinx-autobuild docs docs/_build/html
 docs:
 	rm -rf docs/_build

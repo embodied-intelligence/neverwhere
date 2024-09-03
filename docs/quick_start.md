@@ -1,12 +1,5 @@
 # Getting Started
 
-To get a quick overview of what you can do with `neverwhere`, check out the following:
-
-- take a look at the basic tutorial or the tutorial for robotics:
-  - [neverwhere Basics](tutorials/basics)
-  - [Tutorial for Roboticists](tutorials/robotics)
-- or try to take a look at the example gallery [here](examples/01_trimesh)
-
 Setting up the conda environment:
 
 ```python
@@ -14,107 +7,54 @@ conda create -n neverwhere python=3.8
 conda activate neverwhere
 ```
 
-Install neverwhere --- the latest version is `{VERSION}` on [pypi](https://pypi.org/project/neverwhere/{VERSION}/).
+Now install the latest version (`{VERSION}`) on [pypi](https://pypi.org/project/neverwhere/{VERSION}/).
 
 ```python
 pip install -U 'neverwhere[all]=={VERSION}'
 ```
 
-Now you should be able to run scripts show in the examples, and look at the 
-results on [neverwhere.ai](https://neverwhere.ai). To view the scene in VR or AR headsets, you
-need to install `ngrok` (see [setting up ngrok](ngrok.io)) to promote the websocket
-to `wss`.
-
-```{admonition} Using ngrok to promote to <code>wss://</code>
+```{admonition}
 :class: tip
-You need to install `ngrok` to promote the local neverwhere server
-from ws://localhost:8012 to wss://xxxx.ngrok.io, (note the double
-w[ss] in the protocol), and pass it as a query parameter that 
-looks like this:
-
-      https://neverwhere.ai?ws=wss://xxxxx.ngrok.io
-
-Note the repeated `ws` and then `wss://` in the query string.
+    the "`" around the [all] is needed in `zsh`, to prevent shell expansion.
 ```
 
-## Running The Example Gallery
+You can test the environment by running the following example:
 
-All examples can be run from the document folder in the neverwhere repository:
-[neverwhere.git/docs](https://github.com/neverwhere-ai/neverwhere/tree/main/docs). First 
-clone the neverwhere repo for example code,
-```shell
-cd ~  # assume working in home directory
-git clone https://github.com/neverwhere-ai/neverwhere.git
+```python
+from neverwhere import neverwhere
+
+env = neverwhere.make("Env-name-v1")
+obs = env.reset()
+done = False
+
+while not done:
+    # randomly sample an action
+    act = env.action_space.sample()
+  
+    obs, reward, done, info = env.step()
 ```
 
-Now, you need to install a few optional dependencies such as `open3d` and `trimesh`
-for loading and processing point cloud and mesh data. The core neverwhere itself odes not 
-depend on these libraries.
+For list of environments, refer to [./environments](environments)
 
-We provide an installation configuration to install these dependencies 
-automatically:
-```shell
-pip install -U 'neverwhere[example]=={VERSION}'
-```
-
-```{admonition} Open3D for Apple Sillicon (2024-03)
-:class: tip
-The newest version of Open3D seems not compatible with Apple Silicon.
-If you are using M1, M2 or M3 macs, install the `open3d==0.15.1` or 
-other patches of `0.15`. 
-```
-
-### Downloading Examples and 3D Assets
-
-To run the examples, you need to download some example 3D assets. The asset 
-files are stored in [this repo](https://github.com/neverwhere-ai/assets) with git lfs.
-
-If you haven't, you should follow the git lfs installation instructions to set 
-up git lfs repository using [PackageCloud](https://packagecloud.io/github/git-lfs/install)
-and to install git lfs extension by following the instructions [here](https://github.com/git-lfs/git-lfs/blob/main/INSTALLING.md).
-
-**Optional:** To minimize efforts, we provide sample command lines here that we have
-tested to work on a computer running x64 Ubuntu.
-
-```shell
-curl -s https://packagecloud.io/install/repositories/github/git-lfs/script.deb.sh | sudo bash
-sudo apt-get install git-lfs
-git lfs install
-```
-
-With a working installation of `git lfs`, assets should be put into the same folder 
-where the main `neverwhere` repo was cloned by running,
-
-```shell
-cd ~  # assume working in home directory
-git lfs clone https://github.com/neverwhere-ai/assets
-
-# Download optional assets for all examples
-cd assets/robots
-make  # Download some example robot URDFs
-```
-
-After this, you can find code included in the [official neverwhere examples](https://docs.neverwhere.ai/en/latest/examples/01_trimesh.html) under
-`neverwhere/docs/examples`. To run the Trimesh examples, do
-
-```shell
-cd ~  # assume working in home directory
-cd neverwhere/docs/examples
-python 01_trimesh.py
-```
-
-Follow the instructions in the command line to view the visualization. Enjoy!
-
-## Developing neverwhere (Optional)
+## Developing (Optional)
 
 If you want to develop neverwhere, you can install it in editable mode plus dependencies
 relevant for building the documentations:
+
 ```shell
 cd neverwhere
 pip install -e '.[all]'
 ```
-To build the documentations, run
+
+To view the documentations, you can run the `sphinx-autobuild` tool which watches
+the current docs directory for changes and refreshes the webpage upon source change.
+
+```shell
+make preview
+```
+
+To view a static build,
+
 ```shell
 make docs
 ```
-

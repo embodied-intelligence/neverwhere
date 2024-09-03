@@ -7,7 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = "neverwhere"
-copyright = "2023, Ge Yang"
+copyright = "2024, Ge Yang"
 author = "Ge Yang"
 with open("../VERSION", "r") as f:
     version = f.read()
@@ -126,7 +126,7 @@ html_theme_options: Dict[str, Any] = {
             "class": "",
         },
     ],
-    "source_repository": "https://github.com/neverwhere-ai/neverwhere/",
+    "source_repository": "https://github.com/embodied-intelligence/neverwhere/",
     "source_branch": "main",
     "source_directory": "docs/",
 }
