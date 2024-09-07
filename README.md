@@ -25,8 +25,6 @@ pip install -U 'neverwhere[all]'
 
 - [ ] add setup for the dataset.
 
-Here is an example that loads a URDF file and displays it in the browser. For a more comprehensive list of examples, please refer to
-the [examples](https://docs.neverwhere.ai/en/latest/examples/01_trimesh.html) page.
 
 ```python
 from neverwhere import make
@@ -41,10 +39,6 @@ for _ in range(1000):
 ```
 
 To get a quick overview of what you can do with `neverwhere`, check out the following:
-
-- take a look at the example gallery [here](https://docs.neverwhere.ai/en/latest/examples/01_trimesh.html)
-- or try to take a look at this demo with a Unitree Go1 robot in front of a flight of
-  stairs [here](https://docs.neverwhere.ai/en/latest/tutorials/robotics/urdf_go1_stairs.html)
 
 For a comprehensive list of visualization components, please refer to
 the [API documentation on Components](https://docs.neverwhere.ai/en/latest/api/neverwhere.html).
