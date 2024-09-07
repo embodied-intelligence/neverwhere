@@ -1,0 +1,38 @@
+# Uploaded raw
+
+Grassy alley
+```shell
+gaps_grassy_courtyard_v2
+hurdle_one_dark_grassy_courtyard_v1
+hurdle_one_light_grassy_courtyard_v1
+hurdle_one_light_grassy_courtyard_v2
+hurdle_one_light_grassy_courtyard_v3
+hurdle_three_grassy_courtyard_v2
+ramp_grass_v1
+ramp_grass_v3
+wood_ramp_aligned_grass_v1
+wood_ramp_offset_grass_v1
+```
+
+Stata
+```shell
+
+gaps_12in_226_blue_carpet_v2
+gaps_16in_226_blue_carpet_v2
+gaps_226_blue_carpet_v4
+hurdle_226_blue_carpet_v3
+ramp_aligned_blue_carpet_v4
+ramp_aligned_covered_blue_carpet_v6
+ramp_spread_blue_carpet_v5
+ramp_spread_covered_blue_carpet_v7
+```
+
+Stata alley
+```shell
+hurdle_stata_one_v1
+hurdle_stata_v2
+ramp_bricks_v2
+stata_ramped_platform_v3
+wood_ramp_aligned_bricks_v1
+wood_ramp_offset_bricks_v2
+```
