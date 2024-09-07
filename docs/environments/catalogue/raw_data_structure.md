@@ -1,0 +1,2 @@
+# PolyCam Raw Data Structure
+
