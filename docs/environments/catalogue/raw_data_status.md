@@ -95,7 +95,7 @@ stairs_banana_v1
 | ramp_spread_blue_carpet_v5        |                |       |                                        |            |
 | ramp_spread_covered_blue_carpet_v7 |                |       |                                        |            |
 | hurdle_one_226_blue_carpet_v2     | ❌              | ❌     | ❌                                      |            |
-#
+
 ### Stata alley
 |                                    | mesh_info.json | depth | corrected cameras and corrected images | checkpoint | confidence, images, cameras |
 |------------------------------------|----------------|------|----------------------------------------|------------|---------------------------|
@@ -127,6 +127,7 @@ stairs_banana_v1
 | stairs_backstairs_v5               |                |      |                                        |            | ❌                         |
 | stairs_banana_v1                   |                |      |                                        |            | ❌                         |
 | hurdle_one_stata_blue_lab_carpet_v1 | ❌              | ❌    | ❌                                      | ❌          |                           |
+
 
 #
 ### Raw Camera Data Missingg, only checkpoint available
