@@ -53,7 +53,7 @@ real_stair_04_bcs_dusk
 real_stair_05_bcs_rain_v1
 real_stair_06_wh_evening_v1
 real_stair_07_54_v1
-real_stair_08_cs_afternoon_v1
+real_stair_08_mc_afternoon_v1 
 real_stair_10_wh_afternoon_v1
 stairs_36_backstairs_v2
 stairs_48_v3
@@ -63,6 +63,12 @@ stairs_backstairs_v5
 stairs_banana_v1
 
 ```
+###  Earth
+```shell
+stairs_cf_night_v13
+
+```
+
 # 
 ## ⚠️ Missing Files
 
@@ -117,7 +123,7 @@ stairs_banana_v1
 | real_stair_05_bcs_rain_v1          |                |      |                                        |          |                           |
 | real_stair_06_wh_evening_v1        |                |      |                                        |          |                           |
 | real_stair_07_54_v1                |                |      |                                        |          |                           |
-| real_stair_08_cs_afternoon_v1      |                |      |                                        |          |                           |
+| real_stair_08_mc_afternoon_v1      |                |      |                                        |          |                           |
 | real_stair_10_wh_afternoon_v1      |                |      | ❌                                      |          |                           |
 | stairs_36_backstairs_v2            |                |      |                                        |          |                           |
 | stairs_48_v3                       |                |      |                                        |          |                           |
@@ -126,6 +132,12 @@ stairs_banana_v1
 | stairs_backstairs_v5               |                |      |                                        |          | ❌                         |
 | stairs_banana_v1                   |                |      |                                        |          | ❌                         |
 
+
+### Earth
+
+|                                    | mesh_info.json | depth | corrected cameras and corrected images | checkpoint | confidence, images, cameras |
+|------------------------------------|----------------|-------|----------------------------------------|------------|-----------------------------|
+| stairs_cf_night_v13                |                |       |                                        |            |                             |
 
 #
 ### Raw Camera Data Missingg, only checkpoint available
@@ -138,10 +150,8 @@ stairs_banana_v1
 | real_gap_01                                         |                | ❌     | ❌                            |            |
 | real_gap_02                                         |                | ❌     | ❌                            |            |
 | real_hurdle_01                                      |                | ❌     | ❌                            |            |
-| real_hurdle_stata_ally_v1                           | ❌              | ❌     | ❌                            |            |
+| real_hurdle_stata_ally_v1                           | ❌             real_hurdle_stata_ally_v1 | ❌     | ❌                            |            |
 | real_parkour_01                                     |                | ❌     | ❌                            |            |
 | real_stair_01                                       |                | ❌     | ❌                            |            |
-| real_stair_08_mc_afternoon_v1                       |                | ❌     | ❌                            |            |
-| stairs_cf_night_v13                                 |                | ❌     | ❌                            |            |
 | stairs_mc_afternoon_v2                              |                | ❌     | ❌                            |            |
 | stairs_wh_evening_v2                                |                | ❌     | ❌                            |            |

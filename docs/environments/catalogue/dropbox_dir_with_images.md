@@ -75,13 +75,6 @@ hurdle_stata_v1
 hurdle_226_blue_carpet_v3
 ```
 
-## `192` hurdle_226_blue_carpet_v3
-![hurdle_226_blue_carpet_v3](images/hurdle_226_blue_carpet_v3.png)
-
-```shell
-hurdle_226_blue_carpet_v3
-```
-copy
 ## `192` hurdle_black_stone_v1
 ![hurdle_black_stone_v1](images/hurdle_black_stone_v1.png)
 
@@ -124,12 +117,6 @@ hurdle_one_light_grassy_courtyard_v3
 hurdle_stata_one_v1
 ```
 
-## ` 96` hurdle_stata_v1
-![hurdle_stata_v1](images/hurdle_stata_v1.png)
-
-```shell
-hurdle_stata_v1
-```
 
 ## `192` hurdle_stata_v2
 ![hurdle_stata_v2](images/hurdle_stata_v2.png)
@@ -195,171 +182,151 @@ ramp_spread_blue_carpet_v5
 ```
 
 ## `160` ramp_spread_covered_blue_carpet_v7
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![ramp_spread_covered_blue_carpet_v7](images/ramp_spread_covered_blue_carpet_v7.png)
 
 ```shell
-stairs_36_backstairs_v2
+ramp_spread_covered_blue_carpet_v7
 ```
 
 ## `160` real_curb_01
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_curb_01](images/real_curb_01.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_curb_01
 ```
 
 ## `160` real_curb_02
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_curb_02](images/real_curb_02.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_curb_02
 ```
 
 ## `288` real_flat_01_stata_grass
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_flat_01_stata_grass](images/real_flat_01_stata_grass.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_flat_01_stata_grass
 ```
 
 ## `256` real_flat_02_wh_evening
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_flat_02_wh_evening](images/real_flat_02_wh_evening.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_flat_02_wh_evening
 ```
 
 ## `224` real_flat_03_stata_indoor
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_flat_03_stata_indoor](images/real_flat_03_stata_indoor.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_flat_03_stata_indoor
 ```
 
 ## `160` real_gap_01
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_gap_01](images/real_gap_01.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_gap_01
 ```
 
 ## `160` real_gap_02
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_gap_02](images/real_gap_02.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_gap_02
 ```
 
 ## `160` real_hurdle_01
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_hurdle_01](images/real_hurdle_01.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_hurdle_01
 ```
 
 ## `160` real_hurdle_one_blue_carpet_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_hurdle_one_blue_carpet_v2](images/real_hurdle_one_blue_carpet_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
-```
-
-## `128` real_hurdle_one_stata_blue_lab_carpet_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
-
-```shell
-stairs_36_backstairs_v2
-```
-
-## `160` real_hurdle_stata_ally_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
-
-```shell
-stairs_36_backstairs_v2
+real_hurdle_one_blue_carpet_v2
 ```
 
 ## `192` real_hurdle_three_grassy_ally_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_hurdle_three_grassy_ally_v2](images/real_hurdle_three_grassy_ally_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_hurdle_three_grassy_ally_v2
 ```
 
 ## `224` real_parkour_01
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_parkour_01](images/real_parkour_01.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_parkour_01
 ```
 
 ## `192` real_stair_01
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_01](images/real_stair_01.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_01
 ```
 
 ## `224` real_stair_02_bcs_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_02_bcs_v1](images/real_stair_02_bcs_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_02_bcs_v1
 ```
 
 ## `224` real_stair_03_bcs_golden
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_03_bcs_golden](images/real_stair_03_bcs_golden.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_03_bcs_golden
 ```
 
 ## `192` real_stair_04_bcs_dusk
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_04_bcs_dusk](images/real_stair_04_bcs_dusk.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_04_bcs_dusk
 ```
 
 ## `192` real_stair_05_bcs_rain_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_05_bcs_rain_v1](images/real_stair_05_bcs_rain_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_36_backsreal_stair_05_bcs_rain_v1tairs_v2
 ```
 
 ## `192` real_stair_06_wh_evening_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_06_wh_evening_v1](images/real_stair_06_wh_evening_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_06_wh_evening_v1
 ```
 
 ## `192` real_stair_07_54_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_07_54_v1](images/real_stair_07_54_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_07_54_v1
 ```
 
-## `192` real_stair_08_cs_afternoon_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
-
-```shell
-stairs_36_backstairs_v2
-```
 
 ## `224` real_stair_08_mc_afternoon_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_08_mc_afternoon_v1](images/real_stair_08_mc_afternoon_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_08_mc_afternoon_v1
 ```
 
 ## `288` real_stair_10_wh_afternoon_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![real_stair_10_wh_afternoon_v1](images/real_stair_10_wh_afternoon_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+real_stair_10_wh_afternoon_v1
 ```
 
 
@@ -373,92 +340,92 @@ stairs_36_backstairs_v2
 ```
 
 ## `224` stairs_48_v3
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_48_v3](images/stairs_48_v3.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_48_v3
 ```
 
 ## `192` stairs_4_stairs2up_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_4_stairs2up_v1](images/stairs_4_stairs2up_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_4_stairs2up_v1
 ```
 
 ## `160` stairs_54_wooden_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_54_wooden_v1](images/stairs_54_wooden_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_54_wooden_v1
 ```
 
 ## `192` stairs_backstairs_v5
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_backstairs_v5](images/stairs_backstairs_v5.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_backstairs_v5
 ```
 
 ## `224` stairs_banana_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_banana_v1](images/stairs_banana_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_banana_v1
 ```
 
 ## `160` stairs_cf_night_v13
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_cf_night_v13](images/stairs_cf_night_v13.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_cf_night_v13
 ```
 
 ## `160` stairs_mc_afternoon_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_mc_afternoon_v2](images/stairs_mc_afternoon_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_mc_afternoon_v2
 ```
 
 ## `224` stairs_wh_evening_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_wh_evening_v2](images/stairs_wh_evening_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
+stairs_wh_evening_v2
 ```
 
 ## `128` stata_ramped_platform_v3
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stata_ramped_platform_v3](images/stata_ramped_platform_v3.png)
 
 ```shell
-stairs_36_backstairs_v2
+stata_ramped_platform_v3
 ```
 
 ## `192` wood_ramp_aligned_bricks_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![stairs_36_backwood_ramp_aligned_bricks_v1stairs_v2](images/wood_ramp_aligned_bricks_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+wood_ramp_aligned_bricks_v1
 ```
 
 ## `192` wood_ramp_aligned_grass_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![wood_ramp_aligned_grass_v2](images/wood_ramp_aligned_grass_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
+wood_ramp_aligned_grass_v2
 ```
 
 ## `192` wood_ramp_offset_bricks_v2
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![wood_ramp_offset_bricks_v2](images/wood_ramp_offset_bricks_v2.png)
 
 ```shell
-stairs_36_backstairs_v2
+wood_ramp_offset_bricks_v2
 ```
 
 ## `192` wood_ramp_offset_grass_v1
-![stairs_36_backstairs_v2](images/stairs_36_backstairs_v2.png)
+![wood_ramp_offset_grass_v1](images/wood_ramp_offset_grass_v1.png)
 
 ```shell
-stairs_36_backstairs_v2
+wood_ramp_offset_grass_v1
 ```
