@@ -10,7 +10,5 @@
     
     catalogue/raw_data_structure.md
     catalogue/raw_data_status.md
-    catalogue/dropbox_dir.md
     catalogue/dropbox_dir_with_images.md
-    catalogue/hurdle_environments.md
 ```
