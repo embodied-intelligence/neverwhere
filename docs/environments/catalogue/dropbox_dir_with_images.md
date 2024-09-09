@@ -167,13 +167,6 @@ ramp_grass_v1
 ramp_grass_v3
 ```
 
-## `192` ramp_open_1
-![ramp_open_1](images/ramp_open_1.png)
-
-```shell
-ramp_open_1
-```
-
 ## `160` ramp_spread_blue_carpet_v5
 ![ramp_spread_blue_carpet_v5](images/ramp_spread_blue_carpet_v5.png)
 
