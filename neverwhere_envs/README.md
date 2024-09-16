@@ -1,8 +1,9 @@
 # Neverwhere Envs
 
-## Env List
+## Available Scenes
 
-#### Environments with Polycam Scans
+<details>
+<summary>Environments with Polycam Scans</summary>
 
 1. building_31_stairs_v1
 2. curb_gas_tank_v1
@@ -48,7 +49,10 @@
 42. wood_ramp_offset_bricks_v2
 43. wood_ramp_offset_grass_v1
 
-#### Environments without Polycam Scans
+</details>
+
+<details>
+<summary>Environments without Polycam Scans</summary>
 
 1. _archive
 2. gap-stata_v1
@@ -71,7 +75,9 @@
 19. stairs_mc_afternoon_v2
 20. stairs_wh_evening_v2
 
-## File Structure
+</details>
+
+## File Structure [Current]
 
 Each environment typically follows this file structure:
 
@@ -92,7 +98,7 @@ pathtoenvs/
     └── ...
 ```
 
-### Description of files and directories:
+#### Description of files and directories:
 
 1. `environment_name.xml`: XML file containing environment configuration.
 2. `meshes/`: Directory containing mesh files and `.spalt` for the environment.
@@ -101,3 +107,179 @@ pathtoenvs/
 5. `transforms/`: Directory containing `gsplat<->mesh` transformation data
 
 Note: Some environments may have variations in this structure, particularly those listed as not having Polycam scans.
+
+## File Structure [Desired]
+
+```
+polycam/           # contains the raw polycam data
+mesh_openmvs/      # openmvs reconstructed meshes
+    colmap/
+    polycam/
+nerfstudio_data/   
+    colmap/
+    polycam/
+gsplat/
+    model.ckpt
+    splat.ply.splat
+    splat.ply (optional)
+```
+
+#### Minimal Structure (choose the better one from colmap and polycam):
+```
+polycam/           # contains the raw polycam data
+mesh_openmvs/      # openmvs reconstructed meshes (choose the better one from colmap and polycam)
+nerfstudio_data/   # choose the better one from colmap and polycam
+gsplat/
+    model.ckpt
+    splat.ply.splat
+```
+
+## Create Your Own Data
+
+Follow these simple steps to add a new environment to the Neverwhere project:
+
+### Step 1: Obtaining Polycam Scans
+
+1. Use the Polycam app to capture a 3D scan of your desired environment.
+2. Export the raw data from Polycam.
+
+### Step 2: Setting Up the Environment Structure
+
+1. Create a new directory for your environment under `projectpage/neverwhere_envs/datasets`:
+   ```
+   mkdir projectpage/neverwhere_envs/datasets/your_environment_name
+   ```
+
+2. Place the Polycam raw data in a `polycam` folder within your new environment directory:
+   ```
+   mkdir projectpage/neverwhere_envs/datasets/your_environment_name/polycam
+   ```
+   Copy your Polycam raw data into this `polycam` folder.
+
+3. Your new environment structure should look like this:
+   ```
+   projectpage/neverwhere_envs/datasets/
+   └── your_environment_name/
+       └── polycam/
+           └── [Polycam raw data files]
+   ```
+
+### Step 3: Setting Up NeRFStudio Environment
+
+We use [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) to generate COLMAP poses (Polycam data alone may not provide sufficient accuracy.) and point clouds.
+
+1. Install nerfstudio: [Installation Guide](https://docs.nerf.studio/quickstart/installation.html#create-environment)
+2. Install COLMAP in nerfstudio: [COLMAP Setup](https://docs.nerf.studio/quickstart/custom_dataset.html#installing-colmap)
+
+### Step 4: Setting Up OpenMVS Environment
+
+We use [OpenMVS](https://github.com/cdcseacave/openMVS) to generate high-quality meshes for:
+- Initializing 3D Gaussians for high-quality 3DGS Reconstruction
+- Creating accurate collision geometry for the environment
+
+Follow the installation instructions in the [OpenMVS Building Guide](https://github.com/cdcseacave/openMVS/wiki/Building).
+
+### Step 5: Extracting Poses and Process Data
+
+Run the following commands to set up your environment:
+
+```bash
+conda activate nerfstudio
+export PYTHONPATH=$(pwd) # the path to neverwhere project root
+```
+
+**Ziyu: we need to find a better one and only use the better one in the final version** 
+#### Option 1: Colmap Process
+
+1. Extract pose:
+    ```bash
+    SCENE_NAME=your_scene_name
+    DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
+    SCENE_DIR=$DATASET_DIR/$SCENE_NAME
+    IMAGES_PATH=$SCENE_DIR/polycam/keyframes/correct_images
+    if [ ! -d "$IMAGES_PATH" ]; then
+        IMAGES_PATH=$SCENE_DIR/polycam/keyframes/images
+    fi
+    OUTPUT_PATH=$SCENE_DIR/nerfstudio_data/colmap
+
+    ns-process-data images --data $IMAGES_PATH --output-dir $OUTPUT_PATH --matching-method exhaustive --num_downscales 0 --camera_type simple_pinhole
+    ```
+
+    This script will first look for a `correct_images` folder. If it doesn't exist, it will use the `images` folder instead.
+
+2. Prepare colmap data for OpenMVS
+    ```bash
+    colmap model_converter --input_path $OUTPUT_PATH/colmap/sparse/0 --output_path $OUTPUT_PATH/colmap/sparse --output_type TXT
+    ```
+
+3. Run OpenMVS to get textured Mesh
+    ```bash
+    MESH_DIR=$SCENE_DIR/mesh_openmvs
+    mkdir -p $MESH_DIR
+
+    # Interface COLMAP
+    InterfaceCOLMAP \
+    --working-folder $MESH_DIR \
+    --input-file $OUTPUT_PATH/colmap/ \
+    --output-file $MESH_DIR/model_colmap.mvs
+
+    # Densify Point Cloud
+    DensifyPointCloud \
+    --input-file $MESH_DIR/model_colmap.mvs \
+    --working-folder $MESH_DIR \
+    --output-file $MESH_DIR/model_dense.mvs \
+    --archive-type -1
+
+    # Reconstruct Mesh
+    ReconstructMesh \
+    --input-file $MESH_DIR/model_dense.mvs \
+    --working-folder $MESH_DIR \
+    --output-file $MESH_DIR/model_dense_mesh.mvs
+
+    # Refine Mesh
+    RefineMesh \
+    --resolution-level 1 \
+    --input-file $MESH_DIR/model_dense_mesh.mvs \
+    --working-folder $MESH_DIR \
+    --output-file $MESH_DIR/model_dense_mesh_refine.mvs
+
+    # Texture Mesh
+    TextureMesh \
+    --export-type obj \
+    --output-file $MESH_DIR/model.obj \
+    --working-folder $MESH_DIR \
+    --input-file $MESH_DIR/model_dense_mesh_refine.mvs
+    ```
+
+4. Extract Mesh's vertex for gaussian initialization
+   **[WIP]**
+
+5. Run NerfStudio's SplatFacto to get the trained 3DGS
+   ```bash
+   ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/transforms.json \
+       --output-dir $SCENE_DIR/gsplat \
+       --pipeline.model.cull_alpha_thresh=0.05 \
+       --pipeline.model.densify_grad_thresh=0.0008 \
+       --pipeline.model.stop_split_at=30000 \
+       --pipeline.model.max_gauss_ratio=5.0 \
+       --pipeline.model.use_scale_regularization=True \
+       --pipeline.dataparser.orientation_method=none \
+       --pipeline.dataparser.center_method=none \
+       --pipeline.dataparser.auto_scale_poses=False
+   ```
+   Note: We do not use scene pose auto-scale or auto-orientation to maintain alignment with OpenMVS. This eliminates the need for subsequent mesh alignment with the 3DGS model.
+
+
+#### Option 2: Polycam Process
+
+1. Extract pose
+    ```bash
+    SCENE_NAME=your_scene_name
+    DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
+    SCENE_DIR=$DATASET_DIR/$SCENE_NAME
+    IMAGES_PATH=$SCENE_DIR/polycam
+    OUTPUT_PATH=$SCENE_DIR/nerfstudio_data/polycam
+
+    ns-process-data polycam --data $IMAGES_PATH --output-dir $OUTPUT_PATH --num_downscales 0
+    ```
+**[WIP]**
