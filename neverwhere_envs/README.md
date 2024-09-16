@@ -179,6 +179,74 @@ We use [OpenMVS](https://github.com/cdcseacave/openMVS) to generate high-quality
 
 Follow the installation instructions in the [OpenMVS Building Guide](https://github.com/cdcseacave/openMVS/wiki/Building).
 
+<details>
+<summary>Click here for a modified installation guide</summary>
+
+#### Prepare and empty machine for building:
+```bash
+sudo apt-get update -qq && sudo apt-get install -qq
+sudo apt-get -y install git cmake libpng-dev libjpeg-dev libtiff-dev libglu1-mesa-dev
+main_path=$(pwd)
+```
+
+#### Eigen (Required)
+```bash
+git clone https://gitlab.com/libeigen/eigen.git --branch 3.4
+mkdir eigen_build && cd eigen_build
+cmake ../eigen
+make && sudo make install
+cd ..
+```
+
+#### Boost (Required)
+```bash
+sudo apt-get -y install libboost-iostreams-dev libboost-program-options-dev libboost-system-dev libboost-serialization-dev
+```
+
+#### OpenCV (Required)
+```bash
+sudo apt-get -y install libopencv-dev
+```
+
+#### CGAL (Required)
+```bash
+sudo apt-get -y install libcgal-dev libcgal-qt5-dev
+```
+
+#### VCGLib (Required)
+```bash
+git clone https://github.com/cdcseacave/VCG.git vcglib
+```
+
+#### Ceres (Optional)
+```bash
+sudo apt-get -y install libatlas-base-dev libsuitesparse-dev
+git clone https://ceres-solver.googlesource.com/ceres-solver ceres-solver
+mkdir ceres_build && cd ceres_build
+cmake ../ceres-solver/ -DMINIGLOG=ON -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF
+make -j2 && sudo make install
+cd ..
+```
+
+#### GLFW3 (Optional)
+```bash
+sudo apt-get -y install freeglut3-dev libglew-dev libglfw3-dev
+```
+
+#### OpenMVS
+```bash
+git clone https://github.com/cdcseacave/openMVS.git
+mkdir make && cd make
+cmake .. -DCMAKE_BUILD_TYPE=Release -DVCG_ROOT="$main_path/vcglib"
+```
+
+#### Install OpenMVS library (optional):
+```bash
+make -j4 && sudo make install
+```
+
+</details>
+
 ### Step 5: Extracting Poses and Process Data
 
 Run the following commands to set up your environment:
@@ -215,40 +283,23 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
 3. Run OpenMVS to get textured Mesh
     ```bash
     MESH_DIR=$SCENE_DIR/mesh_openmvs
-    mkdir -p $MESH_DIR
 
     # Interface COLMAP
-    InterfaceCOLMAP \
-    --working-folder $MESH_DIR \
-    --input-file $OUTPUT_PATH/colmap/ \
-    --output-file $MESH_DIR/model_colmap.mvs
+    InterfaceCOLMAP -w $MESH_DIR -i $OUTPUT_PATH/colmap/ -o $MESH_DIR/model_colmap.mvs
 
+    ln -s $OUTPUT_PATH/images $MESH_DIR/images
     # Densify Point Cloud
-    DensifyPointCloud \
-    --input-file $MESH_DIR/model_colmap.mvs \
-    --working-folder $MESH_DIR \
-    --output-file $MESH_DIR/model_dense.mvs \
-    --archive-type -1
+    DensifyPointCloud -i $MESH_DIR/model_colmap.mvs -o $MESH_DIR/model_dense.mvs -w $MESH_DIR -v 1
 
     # Reconstruct Mesh
-    ReconstructMesh \
-    --input-file $MESH_DIR/model_dense.mvs \
-    --working-folder $MESH_DIR \
-    --output-file $MESH_DIR/model_dense_mesh.mvs
+    ReconstructMesh -i $MESH_DIR/model_dense.mvs -p $MESH_DIR/model_dense.ply -o $MESH_DIR/model_dense_recon.mvs -w $MESH_DIR
 
     # Refine Mesh
-    RefineMesh \
-    --resolution-level 1 \
-    --input-file $MESH_DIR/model_dense_mesh.mvs \
-    --working-folder $MESH_DIR \
-    --output-file $MESH_DIR/model_dense_mesh_refine.mvs
+    RefineMesh -i $MESH_DIR/model_dense.mvs -m $MESH_DIR/model_dense_recon.ply -o $MESH_DIR/model_dense_mesh_refine.mvs -w $MESH_DIR \
+    --scales 1 --max-face-area 16
 
     # Texture Mesh
-    TextureMesh \
-    --export-type obj \
-    --output-file $MESH_DIR/model.obj \
-    --working-folder $MESH_DIR \
-    --input-file $MESH_DIR/model_dense_mesh_refine.mvs
+    TextureMesh $MESH_DIR/model_dense.mvs -m $MESH_DIR/model_dense_mesh_refine.ply -o $MESH_DIR/model_dense_mesh_refine_texture.mvs -w $MESH_DIR
     ```
 
 4. Extract Mesh's vertex for gaussian initialization
