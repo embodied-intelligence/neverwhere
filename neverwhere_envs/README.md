@@ -202,7 +202,7 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     fi
     OUTPUT_PATH=$SCENE_DIR/nerfstudio_data/colmap
 
-    ns-process-data images --data $IMAGES_PATH --output-dir $OUTPUT_PATH --matching-method exhaustive --num_downscales 0 --camera_type simple_pinhole
+    ns-process-data images --data $IMAGES_PATH --output-dir $OUTPUT_PATH --matching-method exhaustive --num_downscales 0 --camera_type pinhole
     ```
 
     This script will first look for a `correct_images` folder. If it doesn't exist, it will use the `images` folder instead.
