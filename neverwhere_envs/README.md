@@ -317,14 +317,35 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     ```
 
 4. Extract Mesh's Vertices for Gaussian Initialization
-   This step renames the point cloud file created by COLMAP and generates a new point cloud file for Nerfstudio input.
-   ```bash
-   mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
-   python neverwhere_envs/extract_gsplat_init.py \
-       -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
-       -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
-       -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply
-   ```
+    Firstly, run: `mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply`
+    **Option 1: With Combining (Default)**
+
+    This option extracts the mesh's vertices and combines them with the COLMAP point cloud. This is the default behavior.
+
+    ```bash
+    mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+    python neverwhere_envs/extract_gsplat_init.py \
+        -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
+        -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
+        -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply \
+        -c $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+    ```
+
+    The `-c` or `--combine` option specifies the COLMAP point cloud file to combine with the extracted mesh vertices. By default, it combines with the renamed COLMAP point cloud.
+
+    **Option 2: Without Combining**
+
+    If you prefer to extract the mesh's vertices without combining with the COLMAP point cloud, you can omit the `-c` option:
+
+    ```bash
+    mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+    python neverwhere_envs/extract_gsplat_init.py \
+        -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
+        -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
+        -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply
+    ```
+
+    Choose the option that best suits your needs for initializing the Gaussian Splatting process. The default (Option 1) is recommended for most use cases as it combines the mesh vertices with the COLMAP point cloud.
 
 5. Run NerfStudio's SplatFacto to get the trained 3DGS
    ```bash
