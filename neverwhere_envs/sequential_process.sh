@@ -46,7 +46,8 @@ for SCENE_NAME in "${SCENE_NAMES[@]}"; do
         --pipeline.model.densify_grad_thresh=0.0008 \
         --pipeline.model.stop_split_at=30000 \
         --pipeline.model.max_gauss_ratio=5.0 \
-        --pipeline.model.use_scale_regularization=True
+        --pipeline.model.use_scale_regularization=True \
+        --vis=tensorboard
 
     echo "Finished processing scene: $SCENE_NAME"
 done

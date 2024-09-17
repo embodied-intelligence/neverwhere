@@ -355,7 +355,8 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
        --pipeline.model.densify_grad_thresh=0.0008 \
        --pipeline.model.stop_split_at=30000 \
        --pipeline.model.max_gauss_ratio=5.0 \
-       --pipeline.model.use_scale_regularization=True
+       --pipeline.model.use_scale_regularization=True \
+       --vis=tensorboard
    ```
    Note: We do not use scene pose auto-scale or auto-orientation to maintain alignment with OpenMVS. This eliminates the need for subsequent mesh alignment with the 3DGS model.
 
