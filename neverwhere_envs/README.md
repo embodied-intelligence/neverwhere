@@ -288,35 +288,53 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     InterfaceCOLMAP -w $MESH_DIR -i $OUTPUT_PATH/colmap/ -o $MESH_DIR/model_colmap.mvs
 
     ln -s $OUTPUT_PATH/images $MESH_DIR/images
+
     # Densify Point Cloud
-    DensifyPointCloud -i $MESH_DIR/model_colmap.mvs -o $MESH_DIR/model_dense.mvs -w $MESH_DIR -v 1
+    DensifyPointCloud -i $MESH_DIR/model_colmap.mvs \
+        -o $MESH_DIR/model_dense.mvs \
+        -w $MESH_DIR \
+        -v 1
 
     # Reconstruct Mesh
-    ReconstructMesh -i $MESH_DIR/model_dense.mvs -p $MESH_DIR/model_dense.ply -o $MESH_DIR/model_dense_recon.mvs -w $MESH_DIR
+    ReconstructMesh -i $MESH_DIR/model_dense.mvs \
+        -p $MESH_DIR/model_dense.ply \
+        -o $MESH_DIR/model_dense_recon.mvs \
+        -w $MESH_DIR
 
     # Refine Mesh
-    RefineMesh -i $MESH_DIR/model_dense.mvs -m $MESH_DIR/model_dense_recon.ply -o $MESH_DIR/model_dense_mesh_refine.mvs -w $MESH_DIR \
-    --scales 1 --max-face-area 16
+    RefineMesh -i $MESH_DIR/model_dense.mvs \
+        -m $MESH_DIR/model_dense_recon.ply \
+        -o $MESH_DIR/model_dense_mesh_refine.mvs \
+        -w $MESH_DIR \
+        --scales 1 \
+        --max-face-area 16
 
     # Texture Mesh
-    TextureMesh $MESH_DIR/model_dense.mvs -m $MESH_DIR/model_dense_mesh_refine.ply -o $MESH_DIR/model_dense_mesh_refine_texture.mvs -w $MESH_DIR
+    TextureMesh $MESH_DIR/model_dense.mvs \
+        -m $MESH_DIR/model_dense_mesh_refine.ply \
+        -o $MESH_DIR/model_dense_mesh_refine_texture.mvs \
+        -w $MESH_DIR
     ```
 
-4. Extract Mesh's vertex for gaussian initialization
-   **[WIP]**
+4. Extract Mesh's Vertices for Gaussian Initialization
+   This step renames the point cloud file created by COLMAP and generates a new point cloud file for Nerfstudio input.
+   ```bash
+   mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+   python neverwhere_envs/extract_gsplat_init.py \
+       -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
+       -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
+       -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply
+   ```
 
 5. Run NerfStudio's SplatFacto to get the trained 3DGS
    ```bash
-   ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/transforms.json \
+   ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/colmap/transforms.json \
        --output-dir $SCENE_DIR/gsplat \
        --pipeline.model.cull_alpha_thresh=0.05 \
        --pipeline.model.densify_grad_thresh=0.0008 \
        --pipeline.model.stop_split_at=30000 \
        --pipeline.model.max_gauss_ratio=5.0 \
-       --pipeline.model.use_scale_regularization=True \
-       --pipeline.dataparser.orientation_method=none \
-       --pipeline.dataparser.center_method=none \
-       --pipeline.dataparser.auto_scale_poses=False
+       --pipeline.model.use_scale_regularization=True
    ```
    Note: We do not use scene pose auto-scale or auto-orientation to maintain alignment with OpenMVS. This eliminates the need for subsequent mesh alignment with the 3DGS model.
 
