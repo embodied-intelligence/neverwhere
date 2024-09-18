@@ -282,42 +282,52 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
 
 3. Run OpenMVS to get textured Mesh
     ```bash
-    MESH_DIR=$SCENE_DIR/mesh_openmvs
+    OPENMVS_DIR=$SCENE_DIR/openmvs_outpouts
 
     # Interface COLMAP
-    InterfaceCOLMAP -w $MESH_DIR -i $OUTPUT_PATH/colmap/ -o $MESH_DIR/model_colmap.mvs
+    InterfaceCOLMAP -w $OPENMVS_DIR -i $OUTPUT_PATH/colmap/ -o $OPENMVS_DIR/model_colmap.mvs
 
-    ln -s $OUTPUT_PATH/images $MESH_DIR/images
+    ln -s $OUTPUT_PATH/images $OPENMVS_DIR/images
 
     # Densify Point Cloud
-    DensifyPointCloud -i $MESH_DIR/model_colmap.mvs \
-        -o $MESH_DIR/model_dense.mvs \
-        -w $MESH_DIR \
+    DensifyPointCloud -i $OPENMVS_DIR/model_colmap.mvs \
+        -o $OPENMVS_DIR/model_dense.mvs \
+        -w $OPENMVS_DIR \
         -v 1
 
     # Reconstruct Mesh
-    ReconstructMesh -i $MESH_DIR/model_dense.mvs \
-        -p $MESH_DIR/model_dense.ply \
-        -o $MESH_DIR/model_dense_recon.mvs \
-        -w $MESH_DIR
+    ReconstructMesh -i $OPENMVS_DIR/model_dense.mvs \
+        -p $OPENMVS_DIR/model_dense.ply \
+        -o $OPENMVS_DIR/model_dense_recon.mvs \
+        -w $OPENMVS_DIR
 
     # Refine Mesh
-    RefineMesh -i $MESH_DIR/model_dense.mvs \
-        -m $MESH_DIR/model_dense_recon.ply \
-        -o $MESH_DIR/model_dense_mesh_refine.mvs \
-        -w $MESH_DIR \
+    RefineMesh -i $OPENMVS_DIR/model_dense.mvs \
+        -m $OPENMVS_DIR/model_dense_recon.ply \
+        -o $OPENMVS_DIR/model_dense_mesh_refine.mvs \
+        -w $OPENMVS_DIR \
         --scales 1 \
         --max-face-area 16
 
     # Texture Mesh
-    TextureMesh $MESH_DIR/model_dense.mvs \
-        -m $MESH_DIR/model_dense_mesh_refine.ply \
-        -o $MESH_DIR/model_dense_mesh_refine_texture.mvs \
-        -w $MESH_DIR
+    TextureMesh $OPENMVS_DIR/model_dense.mvs \
+        -m $OPENMVS_DIR/model_dense_mesh_refine.ply \
+        -o $OPENMVS_DIR/model_dense_mesh_refine_texture.mvs \
+        -w $OPENMVS_DIR
     ```
 
-4. Extract Mesh's Vertices for Gaussian Initialization
+4. Process Collision Geometry
+    Convert the refined mesh model to OBJ format for use as collision geometry in MuJoCo.
+
+    ```bash
+    python neverwhere_envs/process_collision.py \
+        -i $OPENMVS_DIR/model_dense_mesh_refine.ply \
+        -o $SCENE_DIR/openmvs_meshes/collision.obj
+    ```
+
+5. Extract Mesh's Vertices for Gaussian Initialization
     Firstly, run: `mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply`
+
     **Option 1: With Combining (Default)**
 
     This option extracts the mesh's vertices and combines them with the COLMAP point cloud. This is the default behavior.
@@ -325,8 +335,8 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     ```bash
     mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
     python neverwhere_envs/extract_gsplat_init.py \
-        -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
-        -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
+        -i $OPENMVS_DIR/model_dense_mesh_refine_texture.ply \
+        -t $OPENMVS_DIR/model_dense_mesh_refine_texture0.png \
         -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply \
         -c $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
     ```
@@ -340,14 +350,14 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     ```bash
     mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
     python neverwhere_envs/extract_gsplat_init.py \
-        -i $MESH_DIR/model_dense_mesh_refine_texture.ply \
-        -t $MESH_DIR/model_dense_mesh_refine_texture0.png \
+        -i $OPENMVS_DIR/model_dense_mesh_refine_texture.ply \
+        -t $OPENMVS_DIR/model_dense_mesh_refine_texture0.png \
         -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply
     ```
 
     Choose the option that best suits your needs for initializing the Gaussian Splatting process. The default (Option 1) is recommended for most use cases as it combines the mesh vertices with the COLMAP point cloud.
 
-5. Run NerfStudio's SplatFacto to get the trained 3DGS
+6. Run NerfStudio's SplatFacto to get the trained 3DGS
    ```bash
    ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/colmap/transforms.json \
        --output-dir $SCENE_DIR/gsplat \
