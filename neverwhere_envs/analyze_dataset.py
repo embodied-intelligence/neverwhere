@@ -15,20 +15,21 @@ def analyze_directories(datasetpath):
         has_polycam = os.path.exists(polycam_path) and os.path.isdir(polycam_path)
         
         has_images = False
-        has_corrected_images = False
+        has_correct_images = False
         
         if has_polycam:
             keyframes_path = os.path.join(polycam_path, "keyframes")
             if os.path.exists(keyframes_path) and os.path.isdir(keyframes_path):
-                has_images = any(f.endswith('.jpg') or f.endswith('.png') for f in os.listdir(keyframes_path))
-                corrected_images_path = os.path.join(keyframes_path, "corrected_images")
-                has_corrected_images = os.path.exists(corrected_images_path) and os.path.isdir(corrected_images_path)
+                images_path = os.path.join(keyframes_path, "images")
+                has_images = os.path.exists(images_path) and os.path.isdir(images_path)
+                correct_images_path = os.path.join(keyframes_path, "corrected_images")
+                has_correct_images = os.path.exists(correct_images_path) and os.path.isdir(correct_images_path)
         
         scene_stats.append({
             'name': scene_name,
             'has_polycam': has_polycam,
             'has_images': has_images,
-            'has_corrected_images': has_corrected_images
+            'has_correct_images': has_correct_images
         })
     
     return scene_stats
@@ -42,7 +43,7 @@ def generate_markdown_report(scene_stats):
     md_content += "|------------|--------------|--------|------------------|\n"
     
     for stat in sorted_stats:
-        md_content += f"| {stat['name']} | {'✓' if stat['has_polycam'] else ''} | {'✓' if stat['has_images'] else ''} | {'✓' if stat['has_corrected_images'] else ''} |\n"
+        md_content += f"| {stat['name']} | {'✓' if stat['has_polycam'] else ''} | {'✓' if stat['has_images'] else ''} | {'✓' if stat['has_correct_images'] else ''} |\n"
     
     return md_content
 
