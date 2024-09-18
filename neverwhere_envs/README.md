@@ -112,7 +112,7 @@ Note: Some environments may have variations in this structure, particularly thos
 
 ```
 polycam/           # contains the raw polycam data
-mesh_openmvs/      # openmvs reconstructed meshes
+openmvs_outpouts/      # openmvs reconstructed meshes
     colmap/
     polycam/
 nerfstudio_data/   
@@ -127,7 +127,7 @@ gsplat/
 #### Minimal Structure (choose the better one from colmap and polycam):
 ```
 polycam/           # contains the raw polycam data
-mesh_openmvs/      # openmvs reconstructed meshes (choose the better one from colmap and polycam)
+openmvs_outpouts/      # openmvs reconstructed meshes (choose the better one from colmap and polycam)
 nerfstudio_data/   # choose the better one from colmap and polycam
 gsplat/
     model.ckpt
@@ -259,25 +259,29 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
 **Ziyu: we need to find a better one and only use the better one in the final version** 
 #### Option 1: Colmap Process
 
-1. Extract pose:
+0. Downsample and Move Polycam Keyframes:
+    Polycam captures images at a high frame rate, resulting in a large number of keyframes. To improve processing speed, we recommend downsampling by 2x or 3x for COLMAP estimation and mesh reconstruction. This reduction is typically sufficient for good results:
+
     ```bash
     SCENE_NAME=your_scene_name
     DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
     SCENE_DIR=$DATASET_DIR/$SCENE_NAME
-    IMAGES_PATH=$SCENE_DIR/polycam/keyframes/correct_images
-    if [ ! -d "$IMAGES_PATH" ]; then
-        IMAGES_PATH=$SCENE_DIR/polycam/keyframes/images
-    fi
-    OUTPUT_PATH=$SCENE_DIR/nerfstudio_data/colmap
+    python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 2
+    ```
 
-    ns-process-data images --data $IMAGES_PATH --output-dir $OUTPUT_PATH --matching-method exhaustive --num_downscales 0 --camera_type pinhole
+1. Extract pose:
+    ```bash
+    IMAGES_PATH=$SCENE_DIR/raw_images
+    COLMAP_PATH=$SCENE_DIR/nerfstudio_data/colmap
+
+    ns-process-data images --data $IMAGES_PATH --output-dir $COLMAP_PATH --matching-method sequential --num_downscales 0
     ```
 
     This script will first look for a `correct_images` folder. If it doesn't exist, it will use the `images` folder instead.
 
 2. Prepare colmap data for OpenMVS
     ```bash
-    colmap model_converter --input_path $OUTPUT_PATH/colmap/sparse/0 --output_path $OUTPUT_PATH/colmap/sparse --output_type TXT
+    colmap model_converter --input_path $COLMAP_PATH/colmap/sparse/0 --COLMAP_PATH $COLMAP_PATH/colmap/sparse --output_type TXT
     ```
 
 3. Run OpenMVS to get textured Mesh
@@ -285,9 +289,9 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     OPENMVS_DIR=$SCENE_DIR/openmvs_outpouts
 
     # Interface COLMAP
-    InterfaceCOLMAP -w $OPENMVS_DIR -i $OUTPUT_PATH/colmap/ -o $OPENMVS_DIR/model_colmap.mvs
+    InterfaceCOLMAP -w $OPENMVS_DIR -i $COLMAP_PATH/colmap/ -o $OPENMVS_DIR/model_colmap.mvs
 
-    ln -s $OUTPUT_PATH/images $OPENMVS_DIR/images
+    ln -s $COLMAP_PATH/images $OPENMVS_DIR/images
 
     # Densify Point Cloud
     DensifyPointCloud -i $OPENMVS_DIR/model_colmap.mvs \
@@ -322,7 +326,7 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     ```bash
     python neverwhere_envs/process_collision.py \
         -i $OPENMVS_DIR/model_dense_mesh_refine.ply \
-        -o $SCENE_DIR/openmvs_meshes/collision.obj
+        -o $SCENE_DIR/collision.obj
     ```
 
 5. Extract Mesh's Vertices for Gaussian Initialization
@@ -379,8 +383,8 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
     SCENE_DIR=$DATASET_DIR/$SCENE_NAME
     IMAGES_PATH=$SCENE_DIR/polycam
-    OUTPUT_PATH=$SCENE_DIR/nerfstudio_data/polycam
+    COLMAP_PATH=$SCENE_DIR/nerfstudio_data/polycam
 
-    ns-process-data polycam --data $IMAGES_PATH --output-dir $OUTPUT_PATH --num_downscales 0
+    ns-process-data polycam --data $IMAGES_PATH --output-dir $COLMAP_PATH --num_downscales 0
     ```
 **[WIP]**
