@@ -22,7 +22,7 @@ for SCENE_NAME in "${SCENE_NAMES[@]}"; do
     python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 2
 
     # Step 1: Extract pose
-    ns-process-data images --data $IMAGES_PATH --output-dir $COLMAP_PATH --matching-method sequential --num_downscales 0
+    ns-process-data images --data $IMAGES_PATH --output-dir $COLMAP_PATH --matching-method sequential --num_downscales 0 --camera_type pinhole
 
     # Step 2: Prepare colmap data for OpenMVS
     colmap model_converter --input_path $COLMAP_PATH/colmap/sparse/0 --output_path $COLMAP_PATH/colmap/sparse --output_type TXT

@@ -29,14 +29,14 @@ ln -s $COLMAP_PATH/images $OPENMVS_DIR/images
 DensifyPointCloud -i $OPENMVS_DIR/model_colmap.mvs -o $OPENMVS_DIR/model_dense.mvs -w $OPENMVS_DIR -v 1
 ReconstructMesh -i $OPENMVS_DIR/model_dense.mvs -p $OPENMVS_DIR/model_dense.ply -o $OPENMVS_DIR/model_dense_recon.mvs -w $OPENMVS_DIR
 RefineMesh -i $OPENMVS_DIR/model_dense.mvs -m $OPENMVS_DIR/model_dense_recon.ply -o $OPENMVS_DIR/model_dense_mesh_refine.mvs -w $OPENMVS_DIR --scales 1 --max-face-area 16
-# TextureMesh $OPENMVS_DIR/model_dense.mvs -m $OPENMVS_DIR/model_dense_mesh_refine.ply -o $OPENMVS_DIR/model_dense_mesh_refine_texture.mvs -w $OPENMVS_DIR
+TextureMesh $OPENMVS_DIR/model_dense.mvs -m $OPENMVS_DIR/model_dense_mesh_refine.ply -o $OPENMVS_DIR/model_dense_mesh_refine_texture.mvs -w $OPENMVS_DIR
 
 # Step 4: Process Collision Geometry
 python neverwhere_envs/process_collision.py -i $OPENMVS_DIR/model_dense_mesh_refine.ply -o $SCENE_DIR/collision.obj
 
 # Step 5: Extract Mesh's Vertices for Gaussian Initialization
 mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
-python neverwhere_envs/extract_gsplat_init.py -i $OPENMVS_DIR/model_dense_mesh_refine.ply -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply -c $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+python neverwhere_envs/extract_gsplat_init.py -i $OPENMVS_DIR/model_dense_mesh_refine_texture.ply -t $OPENMVS_DIR/model_dense_mesh_refine_texture0.png -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply -c $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
 
 # Step 6: Run NerfStudio's SplatFacto to get the trained 3DGS
 ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/colmap/transforms.json \
