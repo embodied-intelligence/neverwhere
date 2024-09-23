@@ -40,8 +40,8 @@ the [API documentation | neverwhere](https://neverwhere.readthedocs.com/en/lates
    :caption: Environments 
    :hidden:
    
-   environments/catalogue.md
    environments/wrappers.md
+   environments/catalogue.md
    Making Your Own <environments/making_new_environments.md>
    
    
