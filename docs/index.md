@@ -32,7 +32,7 @@ the [API documentation | neverwhere](https://neverwhere.readthedocs.com/en/lates
    :titlesonly:
 
    Quick Start <quick_start>
-   Report Issues <https://github.com/neverwhere-ai/neverwhere/issues?q=is:issue+is:closed>
+   Report Issues <https://github.com/embodied-intelligence/neverwhere/issues?q=is:issue+is:closed>
    CHANGE LOG <CHANGE_LOG.md>
    
 .. toctree::
