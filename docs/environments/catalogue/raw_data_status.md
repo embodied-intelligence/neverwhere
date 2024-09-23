@@ -1,7 +1,9 @@
-# 🌱 Raw Data Status
+# Raw Data Status 🌱
+
 *Note: Below is the list of raw data available in Dropbox
 
 ### Grassy Alley
+
 ```shell
 gaps_grassy_courtyard_v2             
 hurdle_one_dark_grassy_courtyard_v1  
@@ -18,6 +20,7 @@ wood_ramp_offset_grass_v1
 ```
 
 ### Stata
+
 ```shell
 
 gaps_12in_226_blue_carpet_v2
@@ -33,6 +36,7 @@ ramp_spread_covered_blue_carpet_v7
 ```
 
 ###  Stata Alley
+
 ```shell
 building_31_stairs_v1
 curb_gas_tank_v1
@@ -63,13 +67,14 @@ stairs_backstairs_v5
 stairs_banana_v1
 
 ```
+
 ###  Earth
 ```shell
 stairs_cf_night_v13
 
 ```
 
-# 
+
 ## ⚠️ Missing Files
 
 ### Grassy alley
@@ -87,7 +92,7 @@ stairs_cf_night_v13
 | real_flat_01_stata_grass    |                |       |                                        |            |
 | wood_ramp_aligned_grass_v2  |                |       |                                        |            |
 | wood_ramp_offset_grass_v1   |                |       |                                        |            |
-#
+
 ### Stata
 |                                   | mesh_info.json | depth | corrected cameras and corrected images | checkpoint |
 |-----------------------------------|----------------|-------|----------------------------------------|------------|
@@ -100,7 +105,7 @@ stairs_cf_night_v13
 | ramp_aligned_covered_blue_carpet_v6 |                |       |                                        |            |
 | ramp_spread_blue_carpet_v5        |                |       |                                        |            |
 | ramp_spread_covered_blue_carpet_v7 |                |       |                                        |            |
-#
+
 ### Stata alley
 |                                    | mesh_info.json | depth | corrected cameras and corrected images | checkpoint | confidence, images, cameras |
 |------------------------------------|----------------|------|----------------------------------------|----------|------------------------|
@@ -132,14 +137,12 @@ stairs_cf_night_v13
 | stairs_backstairs_v5               |                |      |                                        |          | ❌                      |
 | stairs_banana_v1                   |                |      |                                        |          | ❌                      |
 
-#
 ### Earth
 
 |                                    | mesh_info.json | depth | corrected cameras and corrected images | checkpoint | confidence, images, cameras |
 |------------------------------------|----------------|-------|----------------------------------------|------------|-----------------------------|
 | stairs_cf_night_v13                |                |       |                                        |            |                             |
 
-#
 ### Raw Camera Data Missing
 * Note: only checkpoint available
 
