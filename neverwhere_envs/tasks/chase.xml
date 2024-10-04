@@ -1,0 +1,48 @@
+<mujoco model="go1 scene">
+    <include file="go1/gabe_go1.xml"/>
+    <option timestep="0.005"/>
+    <statistic center="0 0 0.1" extent="0.8"/>
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+        <global azimuth="-130" elevation="-20"/>
+    </visual>
+    <default>
+        <default class="traffic_cone">
+            <geom type="mesh" group="2" contype="0" conaffinity="0" euler="1.57 0 0"/>
+        </default>
+    </default>
+
+    <asset>
+        <texture type="skybox" builtin="flat" rgb1="0 0 0" rgb2="0 0 0" width="256" height="256"/>
+        <texture type="2d" name="groundplane" builtin="flat" rgb1="0.2 0.2 0.2" rgb2="0.2 0.2 0.2" width="256"
+                 height="256"/>
+        <texture type="2d" name="terrain" builtin="flat" rgb1="0.2 0.2 0.2" rgb2="0.2 0.2 0.2" width="256"
+                 height="256"/>
+        <material name="groundplane" texture="groundplane" reflectance="0.5"/>
+        <material name="terrain" texture="terrain" reflectance="0.5"/>
+        <texture type="cube" name="soccer" file="assets/soccer.png" gridsize="3 3" gridlayout=".U.LFR.DB"/>
+        <texture type="cube" name="basketball" fileleft="./assets/basketball/L.png"
+                 fileright="./assets/basketball/R.png" filefront="./assets/basketball/F.png"
+                 fileback="./assets/basketball/B.png" fileup="./assets/basketball/U.png"
+                 filedown="./assets/basketball/D.png"/>
+        <material name="soccer" texture="soccer" texrepeat="1 1" reflectance="0.2"/>
+        <material name="basketball" texture="basketball" texrepeat="1 1" reflectance="0.2"/>
+        <material name="M_TraficCone_Main" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <material name="M_TraficCone_Additional" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <mesh file="assets/cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_0.obj" scale="0.005 0.005 0.005"/>
+        <mesh file="assets/cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_1.obj" scale="0.005 0.005 0.005"/>
+    </asset>
+
+    <worldbody>
+        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+        <geom name="ground" size="50 50 0.05" type="plane" material="groundplane"/>
+        <body name="ball" pos="10 0 1" mocap="true">
+            <geom name="soccer" type="sphere" size="0.15" material="soccer" euler="0 0 3.14"/>
+            <geom name="basketball" type="sphere" size="0.15" material="basketball"/>
+            <geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone"/>
+            <geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone"/>
+        </body>
+    </worldbody>
+</mujoco>
