@@ -112,7 +112,7 @@ Note: Some environments may have variations in this structure, particularly thos
 
 ```
 polycam/           # contains the raw polycam data
-openmvs_outpouts/      # openmvs reconstructed meshes
+openmvs_outputs/      # openmvs reconstructed meshes
     colmap/
     polycam/
 nerfstudio_data/   
@@ -127,7 +127,7 @@ gsplat/
 #### Minimal Structure (choose the better one from colmap and polycam):
 ```
 polycam/           # contains the raw polycam data
-openmvs_outpouts/      # openmvs reconstructed meshes (choose the better one from colmap and polycam)
+openmvs_outputs/      # openmvs reconstructed meshes (choose the better one from colmap and polycam)
 nerfstudio_data/   # choose the better one from colmap and polycam
 gsplat/
     model.ckpt
@@ -240,7 +240,7 @@ mkdir make && cd make
 cmake .. -DCMAKE_BUILD_TYPE=Release -DVCG_ROOT="$main_path/vcglib"
 ```
 
-#### Install OpenMVS library (optional):
+#### Install OpenMVS library:
 ```bash
 make -j4 && sudo make install
 ```
@@ -286,7 +286,7 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
 
 3. Run OpenMVS to get textured Mesh
     ```bash
-    OPENMVS_DIR=$SCENE_DIR/openmvs_outpouts
+    OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/colmap
 
     # Interface COLMAP
     InterfaceCOLMAP -w $OPENMVS_DIR -i $COLMAP_PATH/colmap/ -o $OPENMVS_DIR/model_colmap.mvs
@@ -383,8 +383,68 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
     SCENE_DIR=$DATASET_DIR/$SCENE_NAME
     IMAGES_PATH=$SCENE_DIR/polycam
-    COLMAP_PATH=$SCENE_DIR/nerfstudio_data/polycam
+    POLYCAM_PATH=$SCENE_DIR/nerfstudio_data/polycam
 
-    ns-process-data polycam --data $IMAGES_PATH --output-dir $COLMAP_PATH --num_downscales 0
+    ns-process-data polycam --data $IMAGES_PATH --output-dir $POLYCAM_PATH --num_downscales 0
     ```
-**[WIP]**
+
+2. Prepare Polycam data for OpenMVS
+    ```bash
+    OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/polycam
+    mkdir -p $OPENMVS_DIR
+
+    # Use InterfacePolycam to convert Polycam data to OpenMVS format
+    InterfacePolycam -i $IMAGES_PATH/keyframes -o $OPENMVS_DIR/model_polycam.mvs
+    ```
+
+3. Run OpenMVS to get textured Mesh
+    ```bash
+    # Densify Point Cloud
+    DensifyPointCloud -i $OPENMVS_DIR/model_polycam.mvs \
+        -o $OPENMVS_DIR/model_dense.mvs \
+        -w $OPENMVS_DIR \
+        --resolution-level 0 --max-resolution 256 \
+        -v 1
+
+    # Reconstruct Mesh
+    ReconstructMesh -i $OPENMVS_DIR/model_dense.mvs \
+        -o $OPENMVS_DIR/model_dense_recon.mvs \
+        -w $OPENMVS_DIR
+
+    # Refine Mesh
+    RefineMesh -i $OPENMVS_DIR/model_dense.mvs \
+        -m $OPENMVS_DIR/model_dense_recon.ply \
+        -o $OPENMVS_DIR/model_dense_mesh_refine.mvs \
+        -w $OPENMVS_DIR \
+        --scales 1 \
+        --max-face-area 16
+
+    # Texture Mesh
+    TextureMesh $OPENMVS_DIR/model_dense.mvs \
+        -m $OPENMVS_DIR/model_dense_mesh_refine.ply \
+        -o $OPENMVS_DIR/model_dense_mesh_refine_texture.mvs \
+        -w $OPENMVS_DIR
+    ```
+
+4. Process Collision Geometry
+    ```bash
+    python neverwhere_envs/process_collision.py \
+        -i $OPENMVS_DIR/model_dense_mesh_refine.ply \
+        -o $SCENE_DIR/collision_polycam.obj
+    ```
+
+5. Extract Mesh's Vertices for Gaussian Initialization
+    ```bash
+    ```
+
+6. Run NerfStudio's SplatFacto to get the trained 3DGS
+   ```bash
+   ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/polycam/transforms.json \
+       --output-dir $SCENE_DIR/gsplat_polycam \
+       --pipeline.model.cull_alpha_thresh=0.05 \
+       --pipeline.model.densify_grad_thresh=0.0008 \
+       --pipeline.model.stop_split_at=30000 \
+       --pipeline.model.max_gauss_ratio=5.0 \
+       --pipeline.model.use_scale_regularization=True \
+       --vis=tensorboard
+   ```

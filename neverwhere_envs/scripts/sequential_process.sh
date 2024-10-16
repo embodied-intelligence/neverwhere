@@ -16,7 +16,7 @@ for SCENE_NAME in "${SCENE_NAMES[@]}"; do
     SCENE_DIR=$DATASET_DIR/$SCENE_NAME
     IMAGES_PATH=$SCENE_DIR/raw_images
     COLMAP_PATH=$SCENE_DIR/nerfstudio_data/colmap
-    OPENMVS_DIR=$SCENE_DIR/openmvs_outpouts
+    OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/colmap
 
     # Step 0: Downsample and Move Polycam Keyframes
     python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 2

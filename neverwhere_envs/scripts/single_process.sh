@@ -12,10 +12,10 @@ DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
 SCENE_DIR=$DATASET_DIR/$SCENE_NAME
 IMAGES_PATH=$SCENE_DIR/raw_images
 COLMAP_PATH=$SCENE_DIR/nerfstudio_data/colmap
-OPENMVS_DIR=$SCENE_DIR/openmvs_outpouts
+OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/colmap
 
 # Step 0: Downsample and Move Polycam Keyframes
-python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 2
+python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 1
 
 # Step 1: Extract pose
 ns-process-data images --data $IMAGES_PATH --output-dir $COLMAP_PATH --matching-method sequential --num_downscales 0 --camera_type pinhole
