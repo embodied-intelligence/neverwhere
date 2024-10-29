@@ -164,12 +164,48 @@ Follow these simple steps to add a new environment to the Neverwhere project:
            └── [Polycam raw data files]
    ```
 
-### Step 3: Setting Up NeRFStudio Environment
+### Step 3: Setting Up COLMAP Environment
 
-We use [nerfstudio](https://github.com/nerfstudio-project/nerfstudio) to generate COLMAP poses (Polycam data alone may not provide sufficient accuracy.) and point clouds.
+We use [COLMAP](https://github.com/colmap/colmap) to generate camera poses and point clouds.
 
-1. Install nerfstudio: [Installation Guide](https://docs.nerf.studio/quickstart/installation.html#create-environment)
-2. Install COLMAP in nerfstudio: [COLMAP Setup](https://docs.nerf.studio/quickstart/custom_dataset.html#installing-colmap)
+<details>
+<summary>COLMAP Installation Guide</summary>
+
+```bash
+# Install dependencies
+sudo apt-get update -qq && sudo apt-get install -qq
+sudo apt-get install \
+    git \
+    cmake \
+    build-essential \
+    libboost-program-options-dev \
+    libboost-filesystem-dev \
+    libboost-graph-dev \
+    libboost-system-dev \
+    libboost-test-dev \
+    libeigen3-dev \
+    libsuitesparse-dev \
+    libfreeimage-dev \
+    libgoogle-glog-dev \
+    libgflags-dev \
+    libglew-dev \
+    qtbase5-dev \
+    libqt5opengl5-dev \
+    libcgal-dev \
+    libcgal-qt5-dev
+
+# Clone COLMAP
+git clone https://github.com/colmap/colmap.git
+
+# Build COLMAP
+cd colmap
+mkdir build
+cd build
+cmake ..
+make -j
+sudo make install
+```
+</details>
 
 ### Step 4: Setting Up OpenMVS Environment
 
@@ -218,6 +254,11 @@ sudo apt-get -y install libcgal-dev libcgal-qt5-dev
 git clone https://github.com/cdcseacave/VCG.git vcglib
 ```
 
+#### Python (Required)
+```bash
+sudo apt-get install -y python3-dev python3-pip python3.10-dev
+```
+
 #### Ceres (Optional)
 ```bash
 sudo apt-get -y install libatlas-base-dev libsuitesparse-dev
@@ -236,13 +277,16 @@ sudo apt-get -y install freeglut3-dev libglew-dev libglfw3-dev
 #### OpenMVS
 ```bash
 git clone https://github.com/cdcseacave/openMVS.git
+cd openMVS
+git checkout develop
 mkdir make && cd make
 cmake .. -DCMAKE_BUILD_TYPE=Release -DVCG_ROOT="$main_path/vcglib"
 ```
 
 #### Install OpenMVS library:
 ```bash
-make -j4 && sudo make install
+make -j4
+sudo make install
 ```
 
 </details>
@@ -257,70 +301,41 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
 ```
 
 **Ziyu: we need to find a better one and only use the better one in the final version** 
-#### Option 1: Colmap Process
+#### Option 1: COLMAP Process
 
-0. Downsample and Move Polycam Keyframes:
-    Polycam captures images at a high frame rate, resulting in a large number of keyframes. To improve processing speed, we recommend downsampling by 2x or 3x for COLMAP estimation and mesh reconstruction. This reduction is typically sufficient for good results:
-
+0. Set up environment and downsample images:
     ```bash
+    # Set up environment
     SCENE_NAME=your_scene_name
     DATASET_DIR=$PYTHONPATH/neverwhere_envs/datasets
     SCENE_DIR=$DATASET_DIR/$SCENE_NAME
+    COLMAP_PATH=$SCENE_DIR/colmap
+    OPENMVS_DIR=$SCENE_DIR/openmvs
+    
+    # Downsample images
     python neverwhere_envs/mv_sample_images.py -i $SCENE_DIR -d 2
     ```
 
-1. Extract pose:
+1. Extract pose using COLMAP:
     ```bash
-    IMAGES_PATH=$SCENE_DIR/raw_images
-    COLMAP_PATH=$SCENE_DIR/nerfstudio_data/colmap
-
-    ns-process-data images --data $IMAGES_PATH --output-dir $COLMAP_PATH --matching-method sequential --num_downscales 0 --camera_type pinhole
+    # Run COLMAP pipeline using our custom runner
+    python neverwhere_envs/runners/colmap_runner.py \
+        --img-dir $SCENE_DIR/images \
+        --output-dir $COLMAP_PATH
     ```
 
-    This script will first look for a `correct_images` folder. If it doesn't exist, it will use the `images` folder instead.
+    This will run COLMAP's feature extraction, matching, and sparse reconstruction pipeline to generate camera poses and a sparse point cloud.
 
-2. Prepare colmap data for OpenMVS
+2. Run OpenMVS to get textured Mesh
     ```bash
-    colmap model_converter --input_path $COLMAP_PATH/colmap/sparse/0 --COLMAP_PATH $COLMAP_PATH/colmap/sparse --output_type TXT
+    # Run OpenMVS pipeline (includes COLMAP interface and mesh generation)
+    python neverwhere_envs/runners/openmvs_runner.py \
+        --img-dir $SCENE_DIR/images \
+        --working-dir $OPENMVS_DIR \
+        --colmap-dir $COLMAP_PATH
     ```
 
-3. Run OpenMVS to get textured Mesh
-    ```bash
-    OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/colmap
-
-    # Interface COLMAP
-    InterfaceCOLMAP -w $OPENMVS_DIR -i $COLMAP_PATH/colmap/ -o $OPENMVS_DIR/model_colmap.mvs
-
-    ln -s $COLMAP_PATH/images $OPENMVS_DIR/images
-
-    # Densify Point Cloud
-    DensifyPointCloud -i $OPENMVS_DIR/model_colmap.mvs \
-        -o $OPENMVS_DIR/model_dense.mvs \
-        -w $OPENMVS_DIR \
-        -v 1
-
-    # Reconstruct Mesh
-    ReconstructMesh -i $OPENMVS_DIR/model_dense.mvs \
-        -p $OPENMVS_DIR/model_dense.ply \
-        -o $OPENMVS_DIR/model_dense_recon.mvs \
-        -w $OPENMVS_DIR
-
-    # Refine Mesh
-    RefineMesh -i $OPENMVS_DIR/model_dense.mvs \
-        -m $OPENMVS_DIR/model_dense_recon.ply \
-        -o $OPENMVS_DIR/model_dense_mesh_refine.mvs \
-        -w $OPENMVS_DIR \
-        --scales 1 \
-        --max-face-area 16
-
-    # Texture Mesh
-    TextureMesh $OPENMVS_DIR/model_dense.mvs \
-        -m $OPENMVS_DIR/model_dense_mesh_refine.ply \
-        -o $OPENMVS_DIR/model_dense_mesh_refine_texture.mvs \
-        -w $OPENMVS_DIR
-    ```
-
-4. Process Collision Geometry
+3. Process Collision Geometry
     Convert the refined mesh model to OBJ format for use as collision geometry in MuJoCo.
 
     ```bash
@@ -329,20 +344,20 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
         -o $SCENE_DIR/collision.obj
     ```
 
-5. Extract Mesh's Vertices for Gaussian Initialization
-    Firstly, run: `mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply`
+4. Extract Mesh's Vertices for Gaussian Initialization
+    Firstly, run: `mv $SCENE_DIR/colmap/sparse_pc.ply $SCENE_DIR/colmap/colmap_pc.ply`
 
     **Option 1: With Combining (Default)**
 
     This option extracts the mesh's vertices and combines them with the COLMAP point cloud. This is the default behavior.
 
     ```bash
-    mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+    mv $SCENE_DIR/colmap/sparse_pc.ply $SCENE_DIR/colmap/colmap_pc.ply
     python neverwhere_envs/extract_gsplat_init.py \
         -i $OPENMVS_DIR/model_dense_mesh_refine_texture.ply \
         -t $OPENMVS_DIR/model_dense_mesh_refine_texture0.png \
-        -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply \
-        -c $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+        -o $SCENE_DIR/colmap/sparse_pc.ply \
+        -c $SCENE_DIR/colmap/colmap_pc.ply
     ```
 
     The `-c` or `--combine` option specifies the COLMAP point cloud file to combine with the extracted mesh vertices. By default, it combines with the renamed COLMAP point cloud.
@@ -352,16 +367,16 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     If you prefer to extract the mesh's vertices without combining with the COLMAP point cloud, you can omit the `-c` option:
 
     ```bash
-    mv $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply $SCENE_DIR/nerfstudio_data/colmap/colmap_pc.ply
+    mv $SCENE_DIR/colmap/sparse_pc.ply $SCENE_DIR/colmap/colmap_pc.ply
     python neverwhere_envs/extract_gsplat_init.py \
         -i $OPENMVS_DIR/model_dense_mesh_refine_texture.ply \
         -t $OPENMVS_DIR/model_dense_mesh_refine_texture0.png \
-        -o $SCENE_DIR/nerfstudio_data/colmap/sparse_pc.ply
+        -o $SCENE_DIR/colmap/sparse_pc.ply
     ```
 
     Choose the option that best suits your needs for initializing the Gaussian Splatting process. The default (Option 1) is recommended for most use cases as it combines the mesh vertices with the COLMAP point cloud.
 
-6. Run NerfStudio's SplatFacto to get the trained 3DGS
+5. Run NerfStudio's SplatFacto to get the trained 3DGS
    ```bash
    ns-train splatfacto-big --data $SCENE_DIR/nerfstudio_data/colmap/transforms.json \
        --output-dir $SCENE_DIR/gsplat \
@@ -393,8 +408,14 @@ export PYTHONPATH=$(pwd) # the path to neverwhere project root
     OPENMVS_DIR=$SCENE_DIR/openmvs_outputs/polycam
     mkdir -p $OPENMVS_DIR
 
-    # Use InterfacePolycam to convert Polycam data to OpenMVS format
+    # Interface Polycam
     InterfacePolycam -i $IMAGES_PATH/keyframes -o $OPENMVS_DIR/model_polycam.mvs
+
+    # Run OpenMVS pipeline
+    python neverwhere_envs/openmvs_runner.py \
+        --working-dir $OPENMVS_DIR \
+        --input-mvs $OPENMVS_DIR/model_polycam.mvs \
+        --is-colmap False
     ```
 
 3. Run OpenMVS to get textured Mesh

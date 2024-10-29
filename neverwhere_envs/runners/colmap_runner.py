@@ -8,9 +8,7 @@ def bash_run(cmd):
 
     subprocess.check_call(['/bin/bash', '-c', cmd])
 
-gpu_index = '0'
-
-def run_sift_matching(img_dir, db_file, remove_exist=False):
+def run_sift_matching(img_dir, db_file, gpu_index, remove_exist=False):
     print('Running sift matching...')
 
     if remove_exist and os.path.exists(db_file):
@@ -78,12 +76,13 @@ def run_model_converter(input_dir, sparse_dir):
     bash_run(cmd)
 
 
-def main(img_dir, output_dir):
+def main(img_dir, output_dir, gpu_index='-1'):
     """
     Run COLMAP SfM pipeline
     Args:
         img_dir: Directory containing input images
         output_dir: Directory for COLMAP output files
+        gpu_index: GPU index to use for SIFT extraction and matching
     """
     print('Running COLMAP pipeline...')
     
@@ -98,7 +97,7 @@ def main(img_dir, output_dir):
     os.makedirs(mvs_dir, exist_ok=True)  # Create MVS directory
     
     # Run SIFT matching
-    run_sift_matching(img_dir, db_file, remove_exist=False)
+    run_sift_matching(img_dir, db_file, gpu_index, remove_exist=False)
     
     # Run SfM
     run_sfm(img_dir, db_file, sparse_dir)
@@ -117,12 +116,15 @@ if __name__ == '__main__':
                       help='Directory containing input images')
     parser.add_argument('--output-dir', type=str, required=True,
                       help='Directory for COLMAP output files')
+    parser.add_argument('--gpu-index', type=str, default='-1',
+                      help='GPU index to use for SIFT extraction and matching')
     
     args = parser.parse_args()
     
     # Run the COLMAP pipeline
     main(
         img_dir=args.img_dir,
-        output_dir=args.output_dir
+        output_dir=args.output_dir,
+        gpu_index=args.gpu_index
     )
 
