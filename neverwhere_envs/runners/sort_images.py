@@ -21,13 +21,8 @@ def sample_and_rename_images(source_dir, dest_dir, downsample):
     
     print(f"Sampled and renamed {len(sampled_images)} images to {dest_dir}")
 
-def main():
-    parser = argparse.ArgumentParser(description="Sample and rename images from Polycam scene directory.")
-    parser.add_argument("-i", "--input-dir", required=True, help="Path to the scene directory")
-    parser.add_argument("-d", "--downsample", type=int, default=1, help="Downsampling factor (default: 1)")
-    args = parser.parse_args()
-
-    scene_dir = Path(args.input_dir)
+def main(input_dir, downsample):
+    scene_dir = Path(input_dir)
     polycam_dir = scene_dir / "polycam"
     
     if not polycam_dir.is_dir():
@@ -46,9 +41,17 @@ def main():
         print(f"Error: Neither 'corrected_images' nor 'images' directory found in {keyframes_dir}")
         return
 
-    raw_images_dir = scene_dir / "raw_images"
+    raw_images_dir = scene_dir / "images"
     
-    sample_and_rename_images(source_dir, raw_images_dir, args.downsample)
+    sample_and_rename_images(source_dir, raw_images_dir, downsample)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="Sample and rename images from Polycam scene directory.")
+    parser.add_argument("-i", "--input-dir", required=True, help="Path to the scene directory")
+    parser.add_argument("-d", "--downsample", type=int, default=1, help="Downsampling factor (default: 1)")
+    args = parser.parse_args()
+    
+    main(
+        input_dir=args.input_dir,
+        downsample=args.downsample
+    )
