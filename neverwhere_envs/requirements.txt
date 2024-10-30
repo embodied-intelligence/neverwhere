@@ -1,4 +1,6 @@
-# for visualization and 3dgs training
+open3d==0.18.0
+opencv-python
+
 viser==0.2.11
 imageio-ffmpeg
 torchmetrics[image]

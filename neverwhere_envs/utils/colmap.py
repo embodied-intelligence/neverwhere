@@ -41,9 +41,7 @@ class Parser:
         self.normalize = normalize
         self.test_every = test_every
 
-        colmap_dir = os.path.join(data_dir, "sparse/0/")
-        if not os.path.exists(colmap_dir):
-            colmap_dir = os.path.join(data_dir, "sparse")
+        colmap_dir = os.path.join(data_dir, "colmap", "mvs", "sparse")
         assert os.path.exists(
             colmap_dir
         ), f"COLMAP directory {colmap_dir} does not exist."
@@ -193,8 +191,13 @@ class Parser:
             points = transform_points(T2, points)
 
             transform = T2 @ T1
+            # Save individual transforms for external use
+            self.T1 = T1
+            self.T2 = T2
         else:
             transform = np.eye(4)
+            self.T1 = np.eye(4)
+            self.T2 = np.eye(4)
 
         self.image_names = image_names  # List[str], (num_images,)
         self.image_paths = image_paths  # List[str], (num_images,)

@@ -22,20 +22,22 @@ from viser.extras.colmap import (
 
 
 def main(
-    colmap_path: Path = Path(__file__).parent / "assets/colmap_garden/sparse/0",
-    images_path: Path = Path(__file__).parent / "assets/colmap_garden/images_8",
+    scene_dir: Path,
     downsample_factor: int = 2,
 ) -> None:
     """Visualize COLMAP sparse reconstruction outputs.
 
     Args:
-        colmap_path: Path to the COLMAP reconstruction directory.
-        images_path: Path to the COLMAP images directory.
+        scene_dir: Path to the scene directory containing COLMAP outputs.
         downsample_factor: Downsample factor for the images.
     """
     server = viser.ViserServer()
     server.gui.configure_theme(titlebar_content=None, control_layout="collapsible")
 
+    # Update paths to use MVS output structure
+    colmap_path = scene_dir / "colmap" / "mvs" /"sparse"
+    images_path = scene_dir / "images"
+    
     # Load the colmap info.
     cameras = read_cameras_binary(colmap_path / "cameras.bin")
     images = read_images_binary(colmap_path / "images.bin")

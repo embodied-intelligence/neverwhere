@@ -1,9 +1,11 @@
 import argparse
+import subprocess
 from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
 from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
 from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
+from neverwhere_envs.runners.gsplat_runner import main as gsplat_main
 
 def main():
     parser = argparse.ArgumentParser(description="Launch Neverwhere reconstruction pipeline")
@@ -34,11 +36,13 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     scene_dir = dataset_dir / scene_name
     colmap_path = scene_dir / "colmap"
     openmvs_dir = scene_dir / "openmvs"
+    gsplat_dir = scene_dir / "gsplat"
     images_dir = scene_dir / "images"
     
     # Create necessary directories
     colmap_path.mkdir(parents=True, exist_ok=True)
     openmvs_dir.mkdir(parents=True, exist_ok=True)
+    gsplat_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Process images
     print("\n=== Processing images ===")
@@ -51,7 +55,7 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     # Step 2: Run COLMAP pipeline
     print("\n=== Running COLMAP pipeline ===")
     colmap_main(
-        img_dir=str(scene_dir / "images"),
+        img_dir=str(images_dir),
         output_dir=str(colmap_path),
         gpu_index=args.gpu_index
     )
@@ -61,7 +65,7 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     openmvs_main(
         working_dir=str(openmvs_dir),
         colmap_dir=str(colmap_path),
-        image_dir=str(scene_dir / "images"),
+        image_dir=str(images_dir),
         gpu_index=args.gpu_index
     )
     
@@ -70,7 +74,14 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     geometry_main(str(scene_dir))
     
     # Step 5: Train 3DGS
-    # [WIP]
+    print("\n=== Training 3D Gaussian Splatting ===")
+    gsplat_main(
+        data_dir=str(scene_dir),
+        result_dir=str(gsplat_dir),
+        gpu_index=args.gpu_index,
+        init_type="openmvs",
+        disable_viewer=True
+    )
     
 
 if __name__ == "__main__":
