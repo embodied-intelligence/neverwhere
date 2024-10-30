@@ -10,7 +10,6 @@ def main():
     parser.add_argument("--dataset-dir", required=True, help="Path to the datasets directory")
     parser.add_argument("--gpu-index", type=str, default='-1', help="GPU index to use for COLMAP and OpenMVS processing")
     parser.add_argument("--downsample", type=int, default=2, help="Downsampling factor (default: 2)")
-    parser.add_argument("--threshold", type=int, default=300, help="Image count threshold for downsampling (default: 300)")
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -19,8 +18,11 @@ def main():
         # Process all subdirectories in dataset_dir
         scene_dirs = [d for d in sorted(dataset_path.iterdir()) if d.is_dir()]
         for scene_dir in scene_dirs:
-            print(f"\n=== Processing scene: {scene_dir.name} ===")
-            process_scene(scene_dir.name, dataset_path, args)
+            try:
+                print(f"\n=== Processing scene: {scene_dir.name} ===")
+                process_scene(scene_dir.name, dataset_path, args)
+            except Exception as e:
+                print(f"Error processing scene {scene_dir.name}: {e}")
     else:
         process_scene(args.scene_name, dataset_path, args)
     
@@ -43,7 +45,6 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         downsample_main(
             input_dir=str(scene_dir), 
             downsample=args.downsample,
-            threshold=args.threshold
         )
     
     # Step 1: Run COLMAP pipeline only if text files don't exist

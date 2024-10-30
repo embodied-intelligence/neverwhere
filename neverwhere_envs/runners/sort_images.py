@@ -3,17 +3,12 @@ import argparse
 import shutil
 from pathlib import Path
 
-def sample_and_rename_images(source_dir, dest_dir, downsample, threshold):
+def sample_and_rename_images(source_dir, dest_dir, downsample):
     # Ensure the destination directory exists
     os.makedirs(dest_dir, exist_ok=True)
     
     # Get all image files from the source directory
     image_files = sorted([f for f in os.listdir(source_dir) if f.lower().endswith(('.png', '.jpg', '.jpeg'))])
-    
-    # If downsample is greater than 1, check image count
-    if downsample > 1 and len(image_files) <= threshold:
-        print(f"Only {len(image_files)} images found (threshold: {threshold}). Skipping downsampling.")
-        downsample = 1
     
     # Sample images at the specified interval
     sampled_images = image_files[::downsample]
@@ -26,7 +21,7 @@ def sample_and_rename_images(source_dir, dest_dir, downsample, threshold):
     
     print(f"Sampled and renamed {len(sampled_images)} images to {dest_dir}")
 
-def main(input_dir, downsample, threshold):
+def main(input_dir, downsample):
     scene_dir = Path(input_dir)
     polycam_dir = scene_dir / "polycam"
     
@@ -48,17 +43,15 @@ def main(input_dir, downsample, threshold):
 
     raw_images_dir = scene_dir / "images"
     
-    sample_and_rename_images(source_dir, raw_images_dir, downsample, threshold)
+    sample_and_rename_images(source_dir, raw_images_dir, downsample)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Sample and rename images from Polycam scene directory.")
     parser.add_argument("-i", "--input-dir", required=True, help="Path to the scene directory")
     parser.add_argument("-d", "--downsample", type=int, default=1, help="Downsampling factor (default: 1)")
-    parser.add_argument("-t", "--threshold", type=int, default=300, help="Image count threshold for downsampling (default: 300)")
     args = parser.parse_args()
     
     main(
         input_dir=args.input_dir,
         downsample=args.downsample,
-        threshold=args.threshold
     )
