@@ -3,6 +3,7 @@ from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
 from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
+from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
 
 def main():
     parser = argparse.ArgumentParser(description="Launch Neverwhere reconstruction pipeline")
@@ -39,34 +40,23 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     colmap_path.mkdir(parents=True, exist_ok=True)
     openmvs_dir.mkdir(parents=True, exist_ok=True)
 
-    # Step 0: Check if downsampled images exist
-    if images_dir.is_dir() and any(images_dir.iterdir()):
-        print("\n=== Downsampled images already exist, skipping downsampling step ===")
-    else:
-        print("\n=== Processing images ===")
-        downsample_main(
-            input_dir=str(scene_dir), 
-            downsample=args.downsample,
-            downsample_threshold=args.downsample_threshold,
-        )
+    # Step 1: Process images
+    print("\n=== Processing images ===")
+    downsample_main(
+        input_dir=str(scene_dir), 
+        downsample=args.downsample,
+        downsample_threshold=args.downsample_threshold,
+    )
     
-    # Step 1: Run COLMAP pipeline only if text files don't exist
-    colmap_txt_files = [
-        colmap_path / "sparse" / "cameras.txt",
-        colmap_path / "sparse" / "images.txt",
-        colmap_path / "sparse" / "points3D.txt"
-    ] # Check if COLMAP text files already exist
-    if not all(f.exists() for f in colmap_txt_files):
-        print("\n=== Running COLMAP pipeline ===")
-        colmap_main(
-            img_dir=str(scene_dir / "images"),
-            output_dir=str(colmap_path),
-            gpu_index=args.gpu_index
-        )
-    else:
-        print("\n=== COLMAP text files already exist, skipping COLMAP pipeline ===")
+    # Step 2: Run COLMAP pipeline
+    print("\n=== Running COLMAP pipeline ===")
+    colmap_main(
+        img_dir=str(scene_dir / "images"),
+        output_dir=str(colmap_path),
+        gpu_index=args.gpu_index
+    )
 
-    # Step 2: Run OpenMVS pipeline
+    # Step 3: Run OpenMVS pipeline
     print("\n=== Running OpenMVS pipeline ===")
     openmvs_main(
         working_dir=str(openmvs_dir),
@@ -74,6 +64,14 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         image_dir=str(scene_dir / "images"),
         gpu_index=args.gpu_index
     )
+    
+    # Step 4: Process geometry
+    print("\n=== Processing geometry ===")
+    geometry_main(str(scene_dir))
+    
+    # Step 5: Train 3DGS
+    # [WIP]
+    
 
 if __name__ == "__main__":
     main() 

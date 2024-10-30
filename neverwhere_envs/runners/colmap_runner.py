@@ -84,6 +84,18 @@ def main(img_dir, output_dir, gpu_index='-1'):
         output_dir: Directory for COLMAP output files
         gpu_index: GPU index to use for SIFT extraction and matching
     """
+    # Check if required text files already exist
+    sparse_dir = os.path.join(output_dir, 'sparse')
+    required_files = [
+        os.path.join(sparse_dir, 'cameras.txt'),
+        os.path.join(sparse_dir, 'images.txt'),
+        os.path.join(sparse_dir, 'points3D.txt')
+    ]
+    
+    if all(os.path.exists(f) for f in required_files):
+        print("\n=== COLMAP text files already exist, skipping COLMAP pipeline ===")
+        return
+        
     print('Running COLMAP pipeline...')
     
     # Create output directory

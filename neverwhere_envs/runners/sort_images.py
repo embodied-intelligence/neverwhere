@@ -31,6 +31,12 @@ def sample_and_rename_images(source_dir, dest_dir, downsample, downsample_thresh
 def main(input_dir, downsample, downsample_threshold=200):
     scene_dir = Path(input_dir)
     polycam_dir = scene_dir / "polycam"
+    raw_images_dir = scene_dir / "images"
+    
+    # Check if downsampled images already exist
+    if raw_images_dir.is_dir() and any(raw_images_dir.iterdir()):
+        print("\n=== Downsampled images already exist, skipping downsampling step ===")
+        return
     
     if not polycam_dir.is_dir():
         print(f"Error: No 'polycam' directory found in {scene_dir}")
@@ -48,8 +54,6 @@ def main(input_dir, downsample, downsample_threshold=200):
         print(f"Error: Neither 'corrected_images' nor 'images' directory found in {keyframes_dir}")
         return
 
-    raw_images_dir = scene_dir / "images"
-    
     sample_and_rename_images(source_dir, raw_images_dir, downsample, downsample_threshold)
 
 if __name__ == "__main__":

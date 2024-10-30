@@ -79,13 +79,33 @@ def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
     refine_mvs = os.path.join(working_dir, 'model_dense_mesh_refine.mvs')
     refine_ply = os.path.join(working_dir, 'model_dense_mesh_refine.ply')
     texture_mvs = os.path.join(working_dir, 'model_dense_mesh_refine_texture.mvs')
+    texture_ply = os.path.join(working_dir, 'model_dense_mesh_refine_texture.ply')
 
     # Run pipeline with GPU index for all steps
-    run_interface_colmap(colmap_dir, colmap_mvs, working_dir, image_dir, gpu_index)
-    run_densify(colmap_mvs, dense_mvs, working_dir, gpu_index)
-    run_reconstruct(dense_mvs, recon_mvs, dense_ply, working_dir, gpu_index)
-    run_refine(dense_mvs, recon_ply, refine_mvs, working_dir, gpu_index)
-    run_texture(dense_mvs, refine_ply, texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
+    if not os.path.exists(colmap_mvs):
+        run_interface_colmap(colmap_dir, colmap_mvs, working_dir, image_dir, gpu_index)
+    else:
+        print(f"Skipping interface_colmap: {colmap_mvs} already exists")
+
+    if not os.path.exists(dense_ply):
+        run_densify(colmap_mvs, dense_mvs, working_dir, gpu_index)
+    else:
+        print(f"Skipping densify: {dense_ply} already exists")
+
+    if not os.path.exists(recon_ply):
+        run_reconstruct(dense_mvs, recon_mvs, dense_ply, working_dir, gpu_index)
+    else:
+        print(f"Skipping reconstruct: {recon_ply} already exists")
+
+    if not os.path.exists(refine_ply):
+        run_refine(dense_mvs, recon_ply, refine_mvs, working_dir, gpu_index)
+    else:
+        print(f"Skipping refine: {refine_ply} already exists")
+
+    if not os.path.exists(texture_ply):
+        run_texture(dense_mvs, refine_ply, texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
+    else:
+        print(f"Skipping texture: {texture_ply} already exists")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run OpenMVS pipeline')
