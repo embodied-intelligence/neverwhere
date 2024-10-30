@@ -37,6 +37,11 @@ def read_points3D_text(path):
 
 def extract_colmap_points(colmap_dir, output_dir):
     """Extract COLMAP points from TXT files and save as PLY."""
+    output_path = os.path.join(output_dir, 'pcd_colmap.ply')
+    if os.path.exists(output_path):
+        print(f"Skipping COLMAP point cloud: {output_path} already exists")
+        return
+    
     # Ensure output directory exists
     os.makedirs(output_dir, exist_ok=True)
     
@@ -60,6 +65,11 @@ def extract_colmap_points(colmap_dir, output_dir):
 
 def process_textured_mesh(mesh_path, output_dir, num_samples=100000):
     """Convert textured mesh to colored point cloud with sampling."""
+    output_path = os.path.join(output_dir, 'pcd_openmvs_colored.ply')
+    if os.path.exists(output_path):
+        print(f"Skipping sampled point cloud: {output_path} already exists")
+        return
+    
     # Load mesh and texture
     mesh = trimesh.load(mesh_path)
     texture_path = mesh_path.replace('.ply', '0.png')
@@ -102,8 +112,12 @@ def process_textured_mesh(mesh_path, output_dir, num_samples=100000):
 
 def process_collision_geometry(mesh_path, output_dir):
     """Process mesh for collision geometry."""
-    mesh = trimesh.load(mesh_path)
     output_path = os.path.join(output_dir, 'collision.obj')
+    if os.path.exists(output_path):
+        print(f"Skipping collision geometry: {output_path} already exists")
+        return
+    
+    mesh = trimesh.load(mesh_path)
     
     # Write OBJ file
     with open(output_path, 'w') as f:
@@ -128,6 +142,11 @@ def process_collision_geometry(mesh_path, output_dir):
 
 def combine_point_clouds(output_dir, sphere_ratio=0.8):
     """Combine COLMAP and OpenMVS point clouds."""
+    output_path = os.path.join(output_dir, 'pcd_gsplat_init.ply')
+    if os.path.exists(output_path):
+        print(f"Skipping combined point cloud: {output_path} already exists")
+        return
+    
     colmap_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_colmap.ply'))
     openmvs_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_openmvs_colored.ply'))
     

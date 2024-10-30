@@ -22,7 +22,7 @@ def main():
         scene_dirs = [d for d in sorted(dataset_path.iterdir()) if d.is_dir()]
         for scene_dir in scene_dirs:
             try:
-                print(f"\n=== Processing scene: {scene_dir.name} ===")
+                print(f"\n==================== Processing scene: {scene_dir.name} ====================")
                 process_scene(scene_dir.name, dataset_path, args)
             except Exception as e:
                 print(f"Error processing scene {scene_dir.name}: {e}")
