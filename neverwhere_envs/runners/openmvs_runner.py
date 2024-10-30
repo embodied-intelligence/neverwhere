@@ -48,7 +48,7 @@ def run_refine(input_mvs, input_mesh, output_mvs, working_dir, gpu_index='-1', s
         --cuda-device {gpu_index}'
     bash_run(cmd)
 
-def run_texture(input_mvs, input_mesh, output_mvs, working_dir, gpu_index='-1', decimate=0.2, resolution_level=2):
+def run_texture(input_mvs, input_mesh, output_mvs, working_dir, gpu_index='-1', decimate=0.1, resolution_level=2):
     print('Running mesh texturing...')
     cmd = f'TextureMesh {input_mvs} \
         -m {input_mesh} \
@@ -85,7 +85,7 @@ def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
     run_densify(colmap_mvs, dense_mvs, working_dir, gpu_index)
     run_reconstruct(dense_mvs, recon_mvs, dense_ply, working_dir, gpu_index)
     run_refine(dense_mvs, recon_ply, refine_mvs, working_dir, gpu_index)
-    run_texture(dense_mvs, refine_ply, texture_mvs, working_dir, gpu_index, decimate=0.2, resolution_level=2)
+    run_texture(dense_mvs, refine_ply, texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run OpenMVS pipeline')

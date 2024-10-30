@@ -39,29 +39,10 @@
 | stairs_48_v3 | ✓ | ✓ | ✓ |
 | stairs_4_stairs2up_v1 | ✓ | ✓ | ✓ |
 | stairs_54_wooden_v1 | ✓ | ✓ | ✓ |
-| stairs_backstairs_v5 | ✓ | ✓ | ✓ |
-| stairs_banana_v1 | ✓ | ✓ | ✓ |
+| stairs_backstairs_v5 | ✓ |  | ✓ |
+| stairs_banana_v1 | ✓ |  | ✓ |
 | stata_ramped_platform_v3 | ✓ | ✓ | ✓ |
 | wood_ramp_aligned_bricks_v1 | ✓ | ✓ | ✓ |
 | wood_ramp_aligned_grass_v2 | ✓ | ✓ | ✓ |
 | wood_ramp_offset_bricks_v2 | ✓ | ✓ | ✓ |
 | wood_ramp_offset_grass_v1 | ✓ | ✓ | ✓ |
-| _archive |  |  |  |
-| gap-stata_v1 |  |  |  |
-| mesh_camera_left |  |  |  |
-| mesh_camera_right |  |  |  |
-| real_curb_01 |  |  |  |
-| real_curb_02 |  |  |  |
-| real_flat_02_wh_evening |  |  |  |
-| real_flat_03_stata_indoor |  |  |  |
-| real_gap_01 |  |  |  |
-| real_gap_02 |  |  |  |
-| real_hurdle_01 |  |  |  |
-| real_parkour_01 |  |  |  |
-| real_stair_01 |  |  |  |
-| real_stair_05_bcs_rain_v1 |  |  |  |
-| real_stair_06_wh_evening_v1 |  |  |  |
-| real_stair_10_wh_afternoon_v1 |  |  |  |
-| stairs_cf_night_v13 |  |  |  |
-| stairs_mc_afternoon_v2 |  |  |  |
-| stairs_wh_evening_v2 |  |  |  |
