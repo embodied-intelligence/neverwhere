@@ -1,6 +1,6 @@
 import os
 import subprocess
-
+import shutil
 def bash_run(cmd):
     COLMAP_BIN = os.getenv('COLMAP_BIN')
     cmd = COLMAP_BIN + ' ' + cmd
@@ -95,6 +95,11 @@ def main(img_dir, output_dir, gpu_index='-1'):
     if all(os.path.exists(f) for f in required_files):
         print("\n=== COLMAP text files already exist, skipping COLMAP pipeline ===")
         return
+    
+    # Delete COLMAP folder if it exists but doesn't have required files
+    if os.path.exists(output_dir) and not all(os.path.exists(f) for f in required_files):
+        print("\n=== Incomplete COLMAP files found, removing COLMAP folder ===")
+        shutil.rmtree(output_dir)
         
     print('Running COLMAP pipeline...')
     

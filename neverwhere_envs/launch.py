@@ -1,4 +1,5 @@
 import argparse
+import shutil
 from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
@@ -6,6 +7,47 @@ from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
 from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
 from neverwhere_envs.runners.gsplat_runner import main as gsplat_main
 from neverwhere_envs.runners.gsplat2d_runner import main as gsplat2d_main
+
+def check_colmap(scene_dir, colmap_path):
+    # Count total images in images directory
+    images_dir = scene_dir / "images"
+    total_images = len(list(images_dir.glob("*.jpg"))) + len(list(images_dir.glob("*.png")))
+    
+    # Count valid images from COLMAP
+    images_txt = colmap_path / "sparse" / "images.txt"
+    valid_images = 0
+    
+    with open(images_txt, 'r') as f:
+        is_camera_description_line = False
+        for line in iter(lambda: f.readline().strip(), ''):
+            if not line or line.startswith('#'):
+                continue
+            is_camera_description_line = not is_camera_description_line
+            if is_camera_description_line:
+                valid_images += 1
+                
+    # Calculate percentage
+    valid_percentage = (valid_images / total_images) * 100
+    print(f"\nCOLMAP validation check:")
+    print(f"Total images: {total_images}")
+    print(f"Valid images: {valid_images}")
+    print(f"Valid percentage: {valid_percentage:.1f}%")
+    
+    # Check if valid images are less than 50%
+    if valid_percentage < 50:
+        print("\nWARNING: Less than 50% of images were successfully processed by COLMAP")
+        
+        # Create error log
+        error_log = scene_dir / "error.log"
+        with open(error_log, 'w') as f:
+            f.write(f"COLMAP Processing Failed\n")
+            f.write(f"Total images: {total_images}\n")
+            f.write(f"Successfully processed: {valid_images}\n")
+            f.write(f"Success rate: {valid_percentage:.1f}%\n")
+        
+        return False
+        
+    return True
 
 def main():
     parser = argparse.ArgumentParser(description="Launch Neverwhere reconstruction pipeline")
@@ -17,6 +59,7 @@ def main():
                        help="Minimum number of images required for downsampling (default: 200)")
     parser.add_argument("--gs-type", type=str, choices=['3dgs', '2dgs', '2dgs+3dgs'], default='3dgs',
                        help="Type of Gaussian Splatting to use (default: 3dgs)")
+    parser.add_argument("--skip-gs", action="store_true", help="Skip Gaussian Splatting training")
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -93,11 +136,17 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     
     # Step 1: Process images
     print("\n=== Processing images ===")
-    downsample_main(
+    delete_cache = downsample_main(
         input_dir=str(scene_dir), 
         downsample=args.downsample,
         downsample_threshold=args.downsample_threshold,
     )
+    
+    if delete_cache:
+        for folder in ["colmap", "openmvs", "geometry", "3dgs", "2dgs"]:
+            folder_path = scene_dir / folder
+            if folder_path.exists():
+                shutil.rmtree(folder_path)
     
     # Step 2: Run COLMAP pipeline
     print("\n=== Running COLMAP pipeline ===")
@@ -106,6 +155,15 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         output_dir=str(colmap_path),
         gpu_index=args.gpu_index
     )
+            
+    # Run COLMAP validation check
+    if not check_colmap(scene_dir, colmap_path):
+        print("Scene processing stopped due to failure of COLMAP")
+        for folder in ["openmvs", "geometry", "3dgs", "2dgs"]:
+            folder_path = scene_dir / folder
+            if folder_path.exists():
+                shutil.rmtree(folder_path)
+        return
 
     # Step 3: Run OpenMVS pipeline
     print("\n=== Running OpenMVS pipeline ===")
@@ -121,13 +179,14 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     geometry_main(str(scene_dir))
     
     # Step 5: Train Gaussian Splatting
-    if args.gs_type == '2dgs+3dgs':
-        run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
-        run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
-    elif args.gs_type == '3dgs':
-        run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
-    else:  # 2dgs
-        run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
+    if not args.skip_gs:
+        if args.gs_type == '2dgs+3dgs':
+            run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
+            run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
+        elif args.gs_type == '3dgs':
+            run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
+        else:  # 2dgs
+            run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
     
 
 if __name__ == "__main__":
