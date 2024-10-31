@@ -1,11 +1,11 @@
 import argparse
-import subprocess
 from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
 from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
 from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
 from neverwhere_envs.runners.gsplat_runner import main as gsplat_main
+from neverwhere_envs.runners.gsplat2d_runner import main as gsplat2d_main
 
 def main():
     parser = argparse.ArgumentParser(description="Launch Neverwhere reconstruction pipeline")
@@ -15,6 +15,8 @@ def main():
     parser.add_argument("--downsample", type=int, default=2, help="Downsampling factor (default: 2)")
     parser.add_argument("--downsample-threshold", type=int, default=200, 
                        help="Minimum number of images required for downsampling (default: 200)")
+    parser.add_argument("--gs-type", type=str, choices=['3dgs', '2dgs', '2dgs+3dgs'], default='3dgs',
+                       help="Type of Gaussian Splatting to use (default: 3dgs)")
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -31,18 +33,71 @@ def main():
     else:
         process_scene(args.scene_name, dataset_path, args)
     
+def run_3dgs_training(scene_dir, gsplat_3d_dir, gpu_index, strategy="default"):
+    from gsplat.strategy import DefaultStrategy, MCMCStrategy
+    print("\n=== Training 3DGS ===")
+    
+    if strategy == "default":
+        gsplat_main(
+            data_dir=str(scene_dir),
+            result_dir=str(gsplat_3d_dir),
+            gpu_index=gpu_index,
+            init_type="openmvs",
+            random_bkgd=True,
+            disable_viewer=True,
+            pose_opt=True,
+            strategy=DefaultStrategy(verbose=True),
+        )
+    elif strategy == "mcmc":
+        gsplat_main(
+            data_dir=str(scene_dir),
+            result_dir=str(gsplat_3d_dir),
+            gpu_index=gpu_index,
+            init_type="openmvs",
+            random_bkgd=True,
+            disable_viewer=True,
+            pose_opt=True,
+            strategy=MCMCStrategy(verbose=True),
+            init_opa=0.5,
+            init_scale=0.1,
+            opacity_reg=0.01,
+            scale_reg=0.01,
+        )
+    else:
+        raise ValueError(f"Invalid strategy: {strategy}")
+
+def run_2dgs_training(scene_dir, gsplat_2d_dir, gpu_index):
+    print("\n=== Training 2DGS ===")
+    gsplat2d_main(
+        data_dir=str(scene_dir),
+        result_dir=str(gsplat_2d_dir),
+        gpu_index=gpu_index,
+        init_type="openmvs",
+        random_bkgd=True,
+        disable_viewer=True,
+        pose_opt=True,
+        normal_loss=True,
+        dist_loss=True,
+        # absgrad=True,
+        # grow_grad2d=0.0006,
+    )
+
 def process_scene(scene_name: str, dataset_dir: Path, args):
     # Setup directories
     scene_dir = dataset_dir / scene_name
     colmap_path = scene_dir / "colmap"
     openmvs_dir = scene_dir / "openmvs"
-    gsplat_dir = scene_dir / "gsplat"
+    gsplat_3d_dir = scene_dir / "3dgs"
+    gsplat_2d_dir = scene_dir / "2dgs"
     images_dir = scene_dir / "images"
     
     # Create necessary directories
     colmap_path.mkdir(parents=True, exist_ok=True)
     openmvs_dir.mkdir(parents=True, exist_ok=True)
-    gsplat_dir.mkdir(parents=True, exist_ok=True)
+    if args.gs_type in ['3dgs', '2dgs+3dgs']:
+        gsplat_3d_dir.mkdir(parents=True, exist_ok=True)
+    if args.gs_type in ['2dgs', '2dgs+3dgs']:
+        gsplat_2d_dir.mkdir(parents=True, exist_ok=True)
 
     # Step 1: Process images
     print("\n=== Processing images ===")
@@ -73,15 +128,14 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     print("\n=== Processing geometry ===")
     geometry_main(str(scene_dir))
     
-    # Step 5: Train 3DGS
-    print("\n=== Training 3D Gaussian Splatting ===")
-    gsplat_main(
-        data_dir=str(scene_dir),
-        result_dir=str(gsplat_dir),
-        gpu_index=args.gpu_index,
-        init_type="openmvs",
-        disable_viewer=True
-    )
+    # Step 5: Train Gaussian Splatting
+    if args.gs_type == '2dgs+3dgs':
+        run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
+        run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
+    elif args.gs_type == '3dgs':
+        run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
+    else:  # 2dgs
+        run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
     
 
 if __name__ == "__main__":
