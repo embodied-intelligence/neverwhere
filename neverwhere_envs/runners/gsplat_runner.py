@@ -1084,13 +1084,15 @@ if __name__ == "__main__":
 
     ```bash
     # Single GPU training
-    CUDA_VISIBLE_DEVICES=0 python simple_trainer.py default
+    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results
 
-    # Distributed training on 4 GPUs: Effectively 4x batch size so run 4x less steps.
-    CUDA_VISIBLE_DEVICES=0,1,2,3 python simple_trainer.py default --steps_scaler 0.25
+    # Evaluation from checkpoint
+    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results --ckpt /path/to/checkpoint.pt
 
+    # Specify GPU
+    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results --gpu_index 0
+    ```
     """
-
     # Config objects we can choose between.
     # Each is a tuple of (CLI description, config object).
     configs = {
@@ -1098,6 +1100,8 @@ if __name__ == "__main__":
             "Gaussian splatting training using densification heuristics from the original paper.",
             Config(
                 strategy=DefaultStrategy(verbose=True),
+                data_dir="",  # Required argument
+                result_dir="",  # Required argument
             ),
         ),
         "mcmc": (
@@ -1108,10 +1112,19 @@ if __name__ == "__main__":
                 opacity_reg=0.01,
                 scale_reg=0.01,
                 strategy=MCMCStrategy(verbose=True),
+                data_dir="",  # Required argument
+                result_dir="",  # Required argument
             ),
         ),
     }
     cfg = tyro.extras.overridable_config_cli(configs)
+    
+    # Validate required arguments
+    if not cfg.data_dir:
+        raise ValueError("--data_dir is required")
+    if not cfg.result_dir:
+        raise ValueError("--result_dir is required")
+        
     cfg.adjust_steps(cfg.steps_scaler)
 
     # try import extra dependencies
@@ -1126,4 +1139,13 @@ if __name__ == "__main__":
                 "and plas (via 'pip install git+https://github.com/fraunhoferhhi/PLAS.git') "
             )
 
-    cli(main, cfg, verbose=True)
+    # Extract the necessary arguments for main()
+    kwargs = vars(cfg)
+    cli(
+        lambda local_rank, world_rank, world_size, args: main(
+            gpu_index=str(local_rank),  # Use local_rank as GPU index
+            **vars(args)
+        ), 
+        cfg, 
+        verbose=True
+    )
