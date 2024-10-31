@@ -32,6 +32,7 @@ def main(input_dir, downsample, downsample_threshold=200):
     scene_dir = Path(input_dir)
     polycam_dir = scene_dir / "polycam"
     raw_images_dir = scene_dir / "images"
+    raw_images_dir.mkdir(parents=True, exist_ok=True)
     
     # Check if downsampled images already exist
     if raw_images_dir.is_dir() and any(raw_images_dir.iterdir()):

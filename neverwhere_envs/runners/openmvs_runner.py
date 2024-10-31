@@ -68,6 +68,7 @@ def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
         image_dir: Directory containing input images
         gpu_index: GPU index to use for OpenMVS commands
     """
+    # Create OpenMVS directory
     os.makedirs(working_dir, exist_ok=True)
 
     # Define file paths

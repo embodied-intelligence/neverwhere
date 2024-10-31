@@ -91,14 +91,6 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     gsplat_2d_dir = scene_dir / "2dgs"
     images_dir = scene_dir / "images"
     
-    # Create necessary directories
-    colmap_path.mkdir(parents=True, exist_ok=True)
-    openmvs_dir.mkdir(parents=True, exist_ok=True)
-    if args.gs_type in ['3dgs', '2dgs+3dgs']:
-        gsplat_3d_dir.mkdir(parents=True, exist_ok=True)
-    if args.gs_type in ['2dgs', '2dgs+3dgs']:
-        gsplat_2d_dir.mkdir(parents=True, exist_ok=True)
-
     # Step 1: Process images
     print("\n=== Processing images ===")
     downsample_main(

@@ -1041,6 +1041,9 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
         gpu_index: GPU index to use
         **kwargs: Additional keyword arguments for the config
     """
+    # Create 3DGS directory
+    os.makedirs(result_dir, exist_ok=True)
+    
     # Create config
     cfg = Config(
         data_dir=data_dir,
