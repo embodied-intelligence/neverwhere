@@ -150,16 +150,21 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     
     # Step 2: Run COLMAP pipeline
     print("\n=== Running COLMAP pipeline ===")
-    colmap_main(
+    colmap_success = colmap_main(
         img_dir=str(images_dir),
         output_dir=str(colmap_path),
         gpu_index=args.gpu_index
     )
             
-    # Run COLMAP validation check
-    if not check_colmap(scene_dir, colmap_path):
-        print("Scene processing stopped due to failure of COLMAP")
-        for folder in ["openmvs", "geometry", "3dgs", "2dgs"]:
+    if not colmap_success:
+        print("Scene processing stopped due to failure of both COLMAP matching methods")
+        # Create error log
+        error_log = scene_dir / "error.log"
+        with open(error_log, 'w') as f:
+            f.write("COLMAP Processing Failed\n")
+            f.write("Both sequential and exhaustive matching methods failed\n")
+            
+        for folder in ["colmap", "openmvs", "geometry", "3dgs", "2dgs"]:
             folder_path = scene_dir / folder
             if folder_path.exists():
                 shutil.rmtree(folder_path)
