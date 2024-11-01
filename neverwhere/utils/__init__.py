@@ -21,7 +21,7 @@ def synchrous_rpc(request_data, *, queue):
     from uuid import uuid4
 
     request_id = str(uuid4())
-    temp_queue_name = f"{TaskQ.ZAKU_USER}:lucidsim:rpc-{request_id}"
+    temp_queue_name = f"{TaskQ.ZAKU_USER}:neverwhere:rpc-{request_id}"
 
     temp_queue = TaskQ(name=temp_queue_name)
 

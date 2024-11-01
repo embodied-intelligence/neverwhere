@@ -1,7 +1,7 @@
 import numpy as np
 
-from lucidsim.cfgs.ball import BallCfg
-from lucidsim.utils.utils import quat_rotate_np, sample_camera_frustum_batch
+from neverwhere.cfgs.ball import BallCfg
+from neverwhere.utils.utils import quat_rotate_np, sample_camera_frustum_batch
 from .ball import Ball
 from .go1_base import Go1
 

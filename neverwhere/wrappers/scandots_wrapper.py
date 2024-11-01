@@ -2,8 +2,8 @@ import gym
 import numpy as np
 from typing import List
 
-from lucidsim.utils.depth_util import invisibility
-from lucidsim.utils.utils import quat_apply_yaw_np
+from neverwhere.utils.depth_util import invisibility
+from neverwhere.utils.utils import quat_apply_yaw_np
 
 
 # todo: add a config struct here.

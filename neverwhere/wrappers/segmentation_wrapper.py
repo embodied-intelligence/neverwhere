@@ -5,7 +5,7 @@ import numpy as np
 import re
 from typing import List, Union
 
-from lucidsim.utils.depth_util import invisibility
+from neverwhere.utils.depth_util import invisibility
 
 
 class SegmentationWrapper(gym.Wrapper):

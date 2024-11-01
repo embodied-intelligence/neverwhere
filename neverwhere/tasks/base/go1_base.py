@@ -4,9 +4,14 @@ import numpy as np
 from dm_control import mujoco
 from dm_control.suite import base
 
-from lucidsim.cfgs.parkour import Go1ParkourCfg
-from lucidsim.utils.utils import quat_from_euler_xyz_np, euler_from_quaternion_np, get_geom_speed, smart_delta_yaw, \
-    quat_rotate_inverse_np
+from neverwhere.cfgs.parkour import Go1ParkourCfg
+from neverwhere.utils.utils import (
+    quat_from_euler_xyz_np,
+    euler_from_quaternion_np,
+    get_geom_speed,
+    smart_delta_yaw,
+    quat_rotate_inverse_np,
+)
 
 
 class Physics(mujoco.Physics):

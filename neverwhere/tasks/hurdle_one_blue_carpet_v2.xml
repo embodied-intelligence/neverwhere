@@ -9,7 +9,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="assets/mit/hurdle_one_blue_carpet_v2.obj">
+        <mesh name="mesh" file="/SSD2/chenziyu/neverwhere_data/real_scenes/hurdle_one_blue_carpet_v2/meshes/hurdle_one_blue_carpet_v2.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
@@ -54,6 +54,7 @@
                 <geom size="50.0 50.0 1" type="plane" material="groundplane"/>
             </body>
         </body>
+        <camera name="global_view" pos="1.917138098243052 0.24198368761479225 2.6943709638079342" xyaxes="1 0 0 0 1 0" />
         <body name="waypoint-0" mocap="true" pos="1.606814194597713 0.1244279653533432 0.3488805631207715">
             <geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone"/>
             <geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone"/>

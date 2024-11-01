@@ -9,7 +9,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="assets/mit/hurdle_stata_one_v1.obj">
+        <mesh name="mesh" file="/SSD2/chenziyu/neverwhere_data/real_scenes/hurdle_stata_one_v1/meshes/hurdle_stata_one_v1.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>

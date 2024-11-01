@@ -12,7 +12,7 @@ import numpy as np
 import re
 from dm_control import mujoco
 
-import lucidsim.utils.transform_utils as trans
+import neverwhere.utils.transform_utils as trans
 
 
 class BaseModder:

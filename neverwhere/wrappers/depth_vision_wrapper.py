@@ -5,7 +5,7 @@ import gym
 import torch
 import torchvision
 
-from lucidsim.utils.depth_util import z2r
+from neverwhere.utils.depth_util import z2r
 
 
 class DepthVisionWrapper(gym.Wrapper):

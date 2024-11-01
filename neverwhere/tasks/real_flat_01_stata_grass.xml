@@ -13,7 +13,7 @@
         <global azimuth="-130" elevation="-20"/>
     </visual>
     <asset>
-        <mesh name="mesh" file="assets/mit/real_flat_01_stata_grass.obj">
+        <mesh name="mesh" file="datasets/real_flat_01_stata_grass/meshes/real_flat_01_stata_grass.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>

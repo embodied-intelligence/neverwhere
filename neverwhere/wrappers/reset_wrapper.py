@@ -4,7 +4,7 @@ from warnings import warn
 import gym
 import numpy as np
 
-from lucidsim.utils.utils import euler_from_quaternion_np
+from neverwhere.utils.utils import euler_from_quaternion_np
 
 CONTACT_TERMINATION_THRESHOLD = 10
 

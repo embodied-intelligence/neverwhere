@@ -4,8 +4,8 @@ import re
 import torch
 from torchvision.utils import flow_to_image
 
-from lucidsim.utils.depth_util import invisibility
-from lucidsim.utils.tf_utils import get_camera_extrinsic_matrix, get_camera_intrinsic_matrix
+from neverwhere.utils.depth_util import invisibility
+from neverwhere.utils.tf_utils import get_camera_extrinsic_matrix, get_camera_intrinsic_matrix
 from optical_flow import warp_forward
 
 

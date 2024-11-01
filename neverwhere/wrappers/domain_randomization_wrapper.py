@@ -8,7 +8,7 @@ robosuite environments.
 import numpy as np
 from gym import Wrapper
 
-from lucidsim.utils.mjmod import CameraModder, DynamicsModder, LightingModder, TextureModder
+from neverwhere.utils.mjmod import CameraModder, DynamicsModder, LightingModder, TextureModder
 
 DEFAULT_COLOR_ARGS = {
     "geom_names": ["floor", "step*", "hurdle*", "ramp*", "ground", "platform*", "table*"],

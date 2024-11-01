@@ -2,12 +2,6 @@ import os
 from contextlib import contextmanager
 from importlib import import_module
 
-# # register all envs
-# from .tasks import chase, gaps, hurdle, parkour, stairs
-#
-# assert [gaps, hurdle, stairs, parkour, chase]
-
-
 @contextmanager
 def ChDir(dir):
     original_wd = os.getcwd()
@@ -36,17 +30,9 @@ def add_env(env_id, entrypoint, kwargs, strict=True):
 
 
 def make(env_id: str, **kwargs):
-    try:
-        module_name, env_name = env_id.split(":")
-    except ValueError:
-        env_name = env_id
-        module_name, *_ = env_id.split("-")
-        module_name = module_name.lower()
+    import neverwhere.tasks.examples
 
-    # relative to the lucidsim name space.
-    import_module("lucidsim.tasks." + module_name)
-
-    env_spec = ALL_ENVS.get(env_name)
+    env_spec = ALL_ENVS.get(env_id)
 
     if env_spec is None:
         raise ModuleNotFoundError(

@@ -1,8 +1,8 @@
 import collections
 import numpy as np
 
-from lucidsim.cfgs.ball import BallCfg
-from lucidsim.utils.utils import (
+from neverwhere.cfgs.ball import BallCfg
+from neverwhere.utils.utils import (
     euler_from_quaternion_np,
     quat_rotate_inverse_np,
     quat_rotate_np,

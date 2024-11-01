@@ -9,7 +9,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="assets/mit/stairs_backstairs_v5.obj">
+        <mesh name="mesh" file="/SSD2/chenziyu/neverwhere_data/real_scenes/stairs_backstairs_v5/meshes/stairs_backstairs_v5.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
