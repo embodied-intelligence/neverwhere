@@ -1,6 +1,10 @@
 open3d==0.18.0
 opencv-python
 
+vuer
+params-proto
+waterbear
+
 viser==0.2.11
 imageio-ffmpeg
 torchmetrics[image]

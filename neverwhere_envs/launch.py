@@ -1,5 +1,6 @@
-import argparse
+import os
 import shutil
+import argparse
 from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
@@ -7,6 +8,7 @@ from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
 from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
 from neverwhere_envs.runners.gsplat_runner import main as gsplat_main
 from neverwhere_envs.runners.gsplat2d_runner import main as gsplat2d_main
+from neverwhere_envs.runners.gsplat_processor import main as gsplat_export_main
 
 def check_colmap(scene_dir, colmap_path):
     # Count total images in images directory
@@ -192,7 +194,28 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
             run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
         else:  # 2dgs
             run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
-    
+
+        # Step 6: Export trained 3DGS model to PLY
+        if args.gs_type in ['3dgs', '2dgs+3dgs']:
+            print("\n=== Exporting 3DGS model to PLY ===")
+            
+            model_ckpt = gsplat_3d_dir / "model.pt"
+            if not model_ckpt.exists():
+                # Look for latest checkpoint
+                ckpt_dir = gsplat_3d_dir / "ckpts"
+                if ckpt_dir.exists():
+                    ckpt_files = sorted([f for f in os.listdir(ckpt_dir) if f.startswith("ckpt_29999_")])
+                    if ckpt_files:
+                        model_ckpt = ckpt_dir / ckpt_files[0]
+            
+            if model_ckpt.exists():
+                gsplat_export_main(
+                    ckpt_path=str(model_ckpt),
+                    gsplat_dir=str(gsplat_3d_dir),
+                    ply_color_mode="sh_coeffs"  # Use SH coefficients for better quality
+                )
+            else:
+                print("Warning: No 3DGS model checkpoint found to export")
 
 if __name__ == "__main__":
     main() 

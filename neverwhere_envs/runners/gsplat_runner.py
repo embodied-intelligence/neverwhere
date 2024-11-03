@@ -2,6 +2,7 @@ import json
 import math
 import os
 import time
+import shutil
 from dataclasses import dataclass, field
 from collections import defaultdict
 from typing import Dict, List, Optional, Tuple, Union
@@ -1041,6 +1042,23 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
         gpu_index: GPU index to use
         **kwargs: Additional keyword arguments for the config
     """
+    # Check for existing model.ckpt
+    model_ckpt = os.path.join(result_dir, "model.pt")
+    if os.path.exists(model_ckpt):
+        print(f"Found existing model checkpoint at {model_ckpt}, skipping...")
+        return
+    
+    # Check for ckpt_29999 files
+    ckpt_dir = os.path.join(result_dir, "ckpts")
+    if os.path.exists(ckpt_dir):
+        ckpt_files = sorted([f for f in os.listdir(ckpt_dir) if f.startswith("ckpt_29999_")])
+        if ckpt_files:
+            ckpt_path = os.path.join(ckpt_dir, ckpt_files[0])
+            print(f"Found checkpoint at {ckpt_path}, copying...")
+            shutil.copy2(ckpt_path, model_ckpt)
+            print(f"Copied checkpoint to {model_ckpt}")
+            return
+
     # Create 3DGS directory
     os.makedirs(result_dir, exist_ok=True)
     
