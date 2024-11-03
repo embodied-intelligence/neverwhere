@@ -220,6 +220,18 @@ def create_splats_with_optimizers(
             points = transform_points(parser.T1, points.numpy())
             points = transform_points(parser.T2, points)
             points = torch.from_numpy(points).float()
+            
+            transform = parser.T2 @ parser.T1
+            transform_3x4 = transform[:3].tolist()
+            
+            with open(os.path.join(parser.data_dir, "3dgs", "data_transforms.json"), "w") as f:
+                json.dump({
+                    "transform": transform_3x4,
+                    "scale": parser.scene_scale
+                }, f, indent=4)
+                
+            raise ValueError("Stop here")
+            
     elif init_type == "sfm":
         points = torch.from_numpy(parser.points).float()
         rgbs = torch.from_numpy(parser.points_rgb / 255.0).float()
