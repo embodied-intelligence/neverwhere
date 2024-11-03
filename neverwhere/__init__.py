@@ -28,9 +28,8 @@ def add_env(env_id, entrypoint, kwargs, strict=True):
         "kwargs": kwargs,
     }
 
-
-def make(env_id: str, **kwargs):
-    import neverwhere.tasks.examples
+def make_lucidsim(env_id: str, **kwargs):
+    import neverwhere.tasks.scenes_lucidsim
 
     env_spec = ALL_ENVS.get(env_id)
 
@@ -42,6 +41,26 @@ def make(env_id: str, **kwargs):
     entry_point = env_spec["entry_point"]
     _kwargs = env_spec.get("kwargs", {})
     _kwargs.update(kwargs)
+    _kwargs["scene_version"] = "lucidsim"
+
+    env = entry_point(**_kwargs)
+
+    return env
+
+def make(env_id: str, **kwargs):
+    import neverwhere.tasks.scenes_neverwhere
+
+    env_spec = ALL_ENVS.get(env_id)
+
+    if env_spec is None:
+        raise ModuleNotFoundError(
+            f"Environment {env_id} is not found. You can choose between:\n{ALL_ENVS}."
+        )
+
+    entry_point = env_spec["entry_point"]
+    _kwargs = env_spec.get("kwargs", {})
+    _kwargs.update(kwargs)
+    _kwargs["scene_version"] = "neverwhere"
 
     env = entry_point(**_kwargs)
 

@@ -14,6 +14,7 @@ from neverwhere.wrappers.reset_wrapper import ResetWrapper
 from neverwhere.wrappers.scandots_wrapper import ScandotsWrapper
 from neverwhere.wrappers.segmentation_wrapper import SegmentationWrapper
 from neverwhere.wrappers.splat_wrapper import SplatWrapper
+from neverwhere.wrappers.gsplat_wrapper import GSplatWrapper
 from neverwhere.wrappers.terrain_randomization_wrapper import TerrainRandomizationWrapper
 from neverwhere.wrappers.vision_wrapper import TrackingVisionWrapper
 
@@ -46,6 +47,7 @@ def entrypoint(
     # for vision
     stack_size=1,
     check_contact_termination=False,
+    scene_version="neverwhere",
     **kwargs,
 ):
     """Returns the Walk task."""
@@ -120,16 +122,32 @@ def entrypoint(
             **kwargs,
         )
         fill_masks = True
-        
-    env = SplatWrapper(
-        env,
-        camera_id="ego-rgb",
-        width=1280,
-        height=720,
-        device=device,
-        fill_masks=fill_masks,
-        **kwargs,
-    )
+    
+    # NOTE(ziyu): in lucidsim, the 3dgs model is trained with nerfstudio's splatfacto
+    # now we use gsplat's trainer, so we need to load the model in a different way
+    # TODO(ziyu): in the future, we should unify the two ways of loading the model
+    if scene_version == "lucidsim":
+        env = SplatWrapper(
+            env,
+            camera_id="ego-rgb",
+            width=1280,
+            height=720,
+            device=device,
+            fill_masks=fill_masks,
+            **kwargs,
+        )
+    elif scene_version == "neverwhere":
+        env = GSplatWrapper(
+            env,
+            camera_id="ego-rgb",
+            width=1280,
+            height=720, 
+            device=device,
+            fill_masks=fill_masks,
+            **kwargs,
+        )
+    else:
+        raise ValueError(f"Unknown data version: {scene_version}")
     # env = TrackingVisionWrapper(
     #     env,
     #     camera_id="ego-rgb",

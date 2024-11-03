@@ -100,7 +100,10 @@ def main(_deps=None, **deps):
     # spawn_pose = deps.get("spawn_pose", spawn_pose)
     initial_state = deps.get("initial_state", initial_state)
 
-    env = neverwhere.make(Unroll.env_name, device=Unroll.device, random=Unroll.seed, initial_state=initial_state)
+    if RUN.scene_version == 'lucidsim':
+        env = neverwhere.make_lucidsim(Unroll.env_name, device=Unroll.device, random=Unroll.seed, initial_state=initial_state)
+    else:
+        env = neverwhere.make(Unroll.env_name, device=Unroll.device, random=Unroll.seed, initial_state=initial_state)
 
     module_path = Unroll.model_entrypoint
     module_name, entrypoint = module_path.split(":")
@@ -237,16 +240,65 @@ def main(_deps=None, **deps):
 
 
 if __name__ == "__main__":
-    job_kwargs = {
-        'unroll.render': True,
-        'unroll.log_metrics': True,
-        'unroll.num_steps': 300,
-        'unroll.vision_key': 'vision',
-        'unroll.env_name': 'Real-heightmap-chase-real_flat_01_stata_grass',
-        'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_gains/2024-03-20/04.03.35/go1/300/20/0.5/checkpoints/model_last.pt',
-        'unroll.seed': 0,
-        'RUN.job_counter': 1,
-        'RUN.prefix': 'neverwhere/neverwhere/ziyu_playground/1101/Real-heightmap-chase-real_flat_01_stata_grass',
-        'RUN.job_name': 'Real-heightmap-chase-real_flat_01_stata_grass'
-    }
-    main(job_kwargs)
+    # lucidsim examples
+    # for env_name in [
+    #     "Real-heightmap-chase-real_flat_01_stata_grass",
+    #     "Real-heightmap-chase-real_flat_02_wh_evening", 
+    #     "Real-heightmap-chase-real_flat_03_stata_indoor"
+    # ]:
+    #     job_kwargs = {
+    #         'unroll.render': True,
+    #         'unroll.log_metrics': True,
+    #         'unroll.num_steps': 300,
+    #         'unroll.vision_key': 'vision',
+    #         'unroll.env_name': env_name,
+    #         'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_gains/2024-03-20/04.03.35/go1/300/20/0.5/checkpoints/model_last.pt',
+    #         'unroll.seed': 0,
+    #         'RUN.job_counter': 1,
+    #         'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1101/{env_name}',
+    #         'RUN.job_name': env_name,
+    #         'RUN.scene_version': 'lucidsim'
+    #     }
+    #     main(job_kwargs)
+    
+    # for env_name in [
+    #     "Real-heightmap-hurdle_one_blue_carpet_v2-cones",
+    #     "Real-heightmap-hurdle_one_dark_grassy_courtyard_v1-cones", 
+    #     "Real-heightmap-hurdle_one_light_grassy_courtyard_v3-cones"
+    # ]:
+    #     job_kwargs = {
+    #         'unroll.render': True,
+    #         'unroll.log_metrics': True,
+    #         'unroll.num_steps': 500,
+    #         'unroll.vision_key': None,
+    #         'unroll.delay': 0,
+    #         'unroll.seed': 500,
+    #         'unroll.env_name': env_name,
+    #         'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_14000.pt',
+    #         'RUN.job_counter': 1,
+    #         'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1101/{env_name}',
+    #         'RUN.job_name': env_name,
+    #         'RUN.scene_version': 'lucidsim'
+    #     }
+    #     main(job_kwargs)
+        
+    # neverwhere examples
+    for env_name in [
+        "Neverwhere-heightmap-gaps_fire_outlet_v3-cones",
+        "Neverwhere-heightmap-curb_gas_tank_v1-cones",
+        "Neverwhere-heightmap-gaps_12in_226_blue_carpet_v2-cones",
+    ]:
+        job_kwargs = {
+            'unroll.render': True,
+            'unroll.log_metrics': True,
+            'unroll.num_steps': 300,
+            'unroll.vision_key': 'vision',
+            'unroll.env_name': env_name,
+            'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_gains/2024-03-20/04.03.35/go1/300/20/0.5/checkpoints/model_last.pt',
+            'unroll.seed': 0,
+            'RUN.job_counter': 1,
+            'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1104/{env_name}',
+            'RUN.job_name': env_name,
+            'RUN.scene_version': 'neverwhere'
+        }
+        main(job_kwargs)
