@@ -12,12 +12,12 @@ from vuer.schemas import DefaultScene, TriMesh, Cylinder, group, Movable, InputB
 
 
 class Args(ParamsProto):
-    dataset_root = Proto(env="LUCIDSIM_EVAL_DATASETS")
-    dataset_prefix = "building_31_stairs_v1/"
+    dataset_root = Proto(env="NEVERWHERE_DATASETS")
+    dataset_prefix = "gaps_12in_226_blue_carpet_v2/"
 
     port = 9001
 
-    template_path = "templates/mesh.xml"
+    template_path = "neverwhere_envs/tools/templates/mesh.xml"
     auto_add = Flag(help="Upon save, add to dog park task list. Overwrites existing file.")
 
     friction = 1.25
@@ -94,8 +94,7 @@ def as_mesh(scene_or_mesh):
 def main(**deps):
     Args._update(deps)
 
-    fname = Path(Args.dataset_prefix).stem + ".obj"
-    mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/meshes/{fname}"
+    mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision.obj"
 
     mesh = as_mesh(trimesh.load_mesh(mesh_path))
 
@@ -115,7 +114,7 @@ def main(**deps):
             SaveArgs.waypoints[int(waypoint_num)]["rotation"] = event.value["rotation"][:3]
 
     @app.add_handler("INPUT")
-    async def chat_handler(event: ClientEvent, session: VuerSession):
+    async def s(event: ClientEvent, session: VuerSession):
         global vertices, sectioned_vertices, zip_index, bbox_coords, bbox_rot, size
 
         key = event.value.split("\n")[0]
