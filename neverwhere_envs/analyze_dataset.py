@@ -39,11 +39,11 @@ def generate_markdown_report(scene_stats):
     sorted_stats = sorted(scene_stats, key=lambda x: (-x['has_polycam'], x['name']))
     
     md_content = "# Dataset Statistics\n\n"
-    md_content += "| Scene Name | Polycam Data | Images | Corrected Images |\n"
-    md_content += "|------------|--------------|--------|------------------|\n"
+    md_content += "| # | Scene Name | Polycam Data | Images | Corrected Images |\n"
+    md_content += "|---|------------|--------------|--------|------------------|\n"
     
-    for stat in sorted_stats:
-        md_content += f"| {stat['name']} | {'✓' if stat['has_polycam'] else ''} | {'✓' if stat['has_images'] else ''} | {'✓' if stat['has_correct_images'] else ''} |\n"
+    for i, stat in enumerate(sorted_stats, 1):
+        md_content += f"| {i} | {stat['name']} | {'✓' if stat['has_polycam'] else ''} | {'✓' if stat['has_images'] else ''} | {'✓' if stat['has_correct_images'] else ''} |\n"
     
     return md_content
 
