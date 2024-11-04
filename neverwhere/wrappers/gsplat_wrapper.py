@@ -93,8 +93,9 @@ class GSplatWrapper(gym.Wrapper):
         self.model_tf[:3, :3] = model_rot
         self.model_tf[:3, 3] = model_translation
 
+        # transformation has already included the scale
         # scale_mat = np.diag([1 / self.scale, 1 / self.scale, 1 / self.scale, 1])
-        
+
         # Apply transformation from data_transforms.json
         self.model_tf = self.model_tf @ np.linalg.inv(self.transform)
 

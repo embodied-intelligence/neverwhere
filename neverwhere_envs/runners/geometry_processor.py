@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import trimesh
 import open3d as o3d
 from PIL import Image
 import subprocess
@@ -109,36 +108,75 @@ def process_textured_mesh(mesh_path, output_dir, num_samples=100000):
     output_path = os.path.join(output_dir, 'pcd_openmvs_colored.ply')
     o3d.io.write_point_cloud(output_path, pcd)
     print(f"Saved sampled point cloud ({num_samples} points) to {output_path}")
+    
+def invert_mesh(mesh):
+    """
+    Inverts a mesh by flipping its faces.
+    
+    Args:
+        mesh: An open3d.geometry.TriangleMesh object
+        
+    Returns:
+        open3d.geometry.TriangleMesh: Inverted mesh with flipped faces
+    """
+    # Create a copy of the mesh to avoid modifying the original
+    inverted_mesh = o3d.geometry.TriangleMesh()
+    inverted_mesh.vertices = mesh.vertices
+    # Flip the triangle indices to invert the mesh
+    triangles = np.asarray(mesh.triangles)
+    inverted_mesh.triangles = o3d.utility.Vector3iVector(np.flip(triangles, axis=1))
+    inverted_mesh.compute_vertex_normals()
+    return inverted_mesh
 
-def process_collision_geometry(mesh_path, output_dir):
+def process_collision_geometry(mesh_path, output_dir, export_invert=False):
     """Process mesh for collision geometry."""
-    output_path = os.path.join(output_dir, 'collision.obj')
-    if os.path.exists(output_path):
-        print(f"Skipping collision geometry: {output_path} already exists")
+    # Define output paths
+    base_path = os.path.join(output_dir, 'collision.obj')
+    base_simplified_path = os.path.join(output_dir, 'collision_simplified.obj')
+    
+    if export_invert:
+        inverted_path = os.path.join(output_dir, 'collision_inverted.obj')
+        inverted_simplified_path = os.path.join(output_dir, 'collision_inverted_simplified.obj')
+        required_paths = [base_path, inverted_path, base_simplified_path, inverted_simplified_path]
+    else:
+        required_paths = [base_path, base_simplified_path]
+    
+    # Skip if all files exist
+    if all(os.path.exists(p) for p in required_paths):
+        print(f"Skipping collision geometry: all files already exist")
         return
     
-    mesh = trimesh.load(mesh_path)
+    # Load original mesh with Open3D
+    mesh = o3d.io.read_triangle_mesh(mesh_path)
     
-    # Write OBJ file
-    with open(output_path, 'w') as f:
-        # Write vertices
-        np.savetxt(f, mesh.vertices, fmt='v %f %f %f')
-        
-        # Write vertex normals if they exist
-        if mesh.vertex_normals is not None:
-            np.savetxt(f, mesh.vertex_normals, fmt='vn %f %f %f')
-        
-        # Write faces
-        if mesh.vertex_normals is not None:
-            face_data = np.column_stack((mesh.faces + 1, mesh.faces + 1))
-            face_format = 'f %d//%d %d//%d %d//%d'
-        else:
-            face_data = mesh.faces + 1
-            face_format = 'f %d %d %d'
-        
-        np.savetxt(f, face_data, fmt=face_format)
+    # Create inverted mesh if needed
+    if export_invert:
+        inverted_mesh = invert_mesh(mesh)
     
-    print(f"Saved collision geometry to {output_path}")
+    # Export original mesh
+    if not os.path.exists(base_path):
+        o3d.io.write_triangle_mesh(base_path, mesh)
+        print(f"Saved collision geometry to {base_path}")
+    
+    # Export inverted mesh if needed
+    if export_invert and not os.path.exists(inverted_path):
+        o3d.io.write_triangle_mesh(inverted_path, inverted_mesh)
+        print(f"Saved inverted collision geometry to {inverted_path}")
+    
+    # Simplify meshes (reduce to ~20% of original faces)
+    target_faces = max(len(np.asarray(mesh.triangles)) // 5, 1000)  # Minimum 1000 faces
+    
+    # Simplify and export original mesh
+    if not os.path.exists(base_simplified_path):
+        simplified_mesh = mesh.simplify_quadric_decimation(target_faces)
+        o3d.io.write_triangle_mesh(base_simplified_path, simplified_mesh)
+        print(f"Saved simplified collision geometry to {base_simplified_path}")
+    
+    # Simplify and export inverted mesh if needed
+    if export_invert and not os.path.exists(inverted_simplified_path):
+        simplified_inverted = inverted_mesh.simplify_quadric_decimation(target_faces)
+        o3d.io.write_triangle_mesh(inverted_simplified_path, simplified_inverted)
+        print(f"Saved simplified inverted collision geometry to {inverted_simplified_path}")
 
 def combine_point_clouds(output_dir, sphere_ratio=0.8):
     """Combine COLMAP and OpenMVS point clouds."""

@@ -43,6 +43,7 @@ class Unroll(ParamsProto, prefix="unroll"):
 
 def main(_deps=None, **deps):
     from ml_logger import logger
+    from cxx.modules.parkour_actor import PolicyArgs
 
     # fixme: temporary patch
     if _deps is not None:
@@ -110,6 +111,7 @@ def main(_deps=None, **deps):
     module = import_module(module_name)
     model_entrypoint = getattr(module, entrypoint)
 
+    PolicyArgs.use_camera = Unroll.vision_key is not None
     try:
         actor = model_entrypoint()
         state_dict = logger.torch_load(Unroll.checkpoint, map_location=Unroll.device)
@@ -274,7 +276,7 @@ if __name__ == "__main__":
     #         'unroll.delay': 0,
     #         'unroll.seed': 500,
     #         'unroll.env_name': env_name,
-    #         'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_14000.pt',
+    #         'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_last.pt',
     #         'RUN.job_counter': 1,
     #         'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1101/{env_name}',
     #         'RUN.job_name': env_name,
@@ -284,6 +286,7 @@ if __name__ == "__main__":
         
     # neverwhere examples
     for env_name in [
+        "Neverwhere-heightmap-hurdle_226_blue_carpet_v3-cones"
         "Neverwhere-heightmap-gaps_fire_outlet_v3-cones",
         "Neverwhere-heightmap-curb_gas_tank_v1-cones",
         "Neverwhere-heightmap-gaps_12in_226_blue_carpet_v2-cones",
@@ -292,9 +295,9 @@ if __name__ == "__main__":
             'unroll.render': True,
             'unroll.log_metrics': True,
             'unroll.num_steps': 300,
-            'unroll.vision_key': 'vision',
+            'unroll.vision_key': None,
             'unroll.env_name': env_name,
-            'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_gains/2024-03-20/04.03.35/go1/300/20/0.5/checkpoints/model_last.pt',
+            'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_last.pt',
             'unroll.seed': 0,
             'RUN.job_counter': 1,
             'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1104/{env_name}',

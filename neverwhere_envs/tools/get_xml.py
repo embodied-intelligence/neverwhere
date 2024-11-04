@@ -13,7 +13,7 @@ from vuer.schemas import DefaultScene, TriMesh, Cylinder, group, Movable, InputB
 
 class Args(ParamsProto):
     dataset_root = Proto(env="NEVERWHERE_DATASETS")
-    dataset_prefix = "gaps_12in_226_blue_carpet_v2/"
+    dataset_prefix = "hurdle_226_blue_carpet_v3/"
 
     port = 9001
 
@@ -94,7 +94,11 @@ def as_mesh(scene_or_mesh):
 def main(**deps):
     Args._update(deps)
 
-    mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision.obj"
+    # first try load simplified collision geometry
+    try:
+        mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision_simplified.obj"
+    except FileNotFoundError:
+        mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision.obj"
 
     mesh = as_mesh(trimesh.load_mesh(mesh_path))
 
