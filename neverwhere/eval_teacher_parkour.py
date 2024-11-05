@@ -285,12 +285,9 @@ if __name__ == "__main__":
     #     main(job_kwargs)
         
     # neverwhere examples
-    for env_name in [
-        "Neverwhere-heightmap-hurdle_226_blue_carpet_v3-cones"
-        "Neverwhere-heightmap-gaps_fire_outlet_v3-cones",
-        "Neverwhere-heightmap-curb_gas_tank_v1-cones",
-        "Neverwhere-heightmap-gaps_12in_226_blue_carpet_v2-cones",
-    ]:
+    available_scenes_list = open("neverwhere_envs/scene_list.txt").read().splitlines()
+    for scene_name in available_scenes_list:
+        env_name = f"Neverwhere-heightmap-{scene_name}-cones" 
         job_kwargs = {
             'unroll.render': True,
             'unroll.log_metrics': True,
@@ -300,7 +297,7 @@ if __name__ == "__main__":
             'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_last.pt',
             'unroll.seed': 0,
             'RUN.job_counter': 1,
-            'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1104/{env_name}',
+            'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1105_test_realscenes/{env_name}',
             'RUN.job_name': env_name,
             'RUN.scene_version': 'neverwhere'
         }

@@ -128,7 +128,7 @@ def invert_mesh(mesh):
     inverted_mesh.compute_vertex_normals()
     return inverted_mesh
 
-def process_collision_geometry(mesh_path, output_dir, export_invert=False):
+def process_collision_geometry(mesh_path, output_dir, export_invert=True):
     """Process mesh for collision geometry."""
     # Define output paths
     base_path = os.path.join(output_dir, 'collision.obj')

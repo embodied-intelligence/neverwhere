@@ -103,7 +103,7 @@ def entrypoint(
             width=1280,
             height=720,
         )
-
+    env = ScandotsWrapper(env, **kwargs, device=device)
     env = SegmentationWrapper(
         env,
         width=1280,

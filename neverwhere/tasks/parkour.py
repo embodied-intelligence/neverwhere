@@ -103,7 +103,8 @@ def entrypoint(
     if terrain_rand_params is not None:
         terrain_type = terrain_rand_params.pop("terrain_type")
         env = TerrainRandomizationWrapper(env, terrain_type=terrain_type, rand_params=terrain_rand_params, random=random)
-        
+    
+    env = ScandotsWrapper(env, **kwargs, device=device)
     fill_masks = False
     if use_cones: # need seg and RGB
         env = SegmentationWrapper(

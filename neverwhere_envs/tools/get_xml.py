@@ -19,7 +19,7 @@ class Args(ParamsProto):
     port = 9001
 
     template_path = "neverwhere_envs/tools/templates/mesh.xml"
-    auto_add = Flag(help="Upon save, add to dog park task list. Overwrites existing file.")
+    auto_add = True
 
     friction = 1.25
 
@@ -167,13 +167,10 @@ def main(**deps):
             tree.write(save_path, encoding="unicode", xml_declaration=True)
 
             if Args.auto_add:
-                task_folder = Path(__file__).parent.parent / "lucidsim" / "tasks"
-                tree.write(f"{task_folder / Path(save_path).name}")
+                task_folder = Path(__file__).parent.parent.parent / "neverwhere" / "tasks"
+                tree.write(f"{task_folder / f'neverwhere_{Path(save_path).name}'}")
 
-                print(f"Added to dog park task list..{task_folder / Path(save_path).name}")
-
-            # with open(save_path, "w") as file:
-            #     file.write(prettify(root))
+                print(f"Added to dog park task list..{task_folder / f'neverwhere_{Path(save_path).name}'}")
 
             print(f"saved..{save_path}")
 
@@ -183,7 +180,7 @@ def main(**deps):
             SaveArgs.waypoints.append(
                 {
                     "position": [0, 0, 0],
-                    "rotation": [0, 0, 0],
+                    "rotation": [0, 0, 1],
                 }
             )
             # add new movable
@@ -196,7 +193,7 @@ def main(**deps):
                     key=f"sphere_{next_waypoint_key}",
                 ),
                 key=f"waypoint_{next_waypoint_key}",
-                position=[0, 0, 3],
+                position=[0, 0, 1],
             )
 
             print("Created new waypoint", SaveArgs.waypoints)
