@@ -3,17 +3,18 @@ from xml.dom import minidom
 
 import numpy as np
 import trimesh
+import transforms3d
 import xml.etree.ElementTree as ET
 from params_proto import ParamsProto, Proto, Flag
 from pathlib import Path
 from vuer import Vuer, VuerSession
 from vuer.events import Set, ClientEvent
-from vuer.schemas import DefaultScene, TriMesh, Cylinder, group, Movable, InputBox, AutoScroll, div
-
+from vuer.schemas import DefaultScene, TriMesh, Cylinder, group, Movable, InputBox, AutoScroll, div, Sphere
+from neverwhere_envs.utils.transform import compute_alignment_transform
 
 class Args(ParamsProto):
     dataset_root = Proto(env="NEVERWHERE_DATASETS")
-    dataset_prefix = "hurdle_226_blue_carpet_v3/"
+    dataset_prefix = "gaps_fire_outlet_v3/"
 
     port = 9001
 
@@ -27,7 +28,15 @@ class SaveArgs:
     position = [0, 0, 0]
     rotation = [0, 0, 0]
     waypoints = []
+    markers = []
 
+
+MARKER_COLORS = ["red", "blue", "purple", "black"]
+# after alignment:
+# red marker: P0 (origin)
+# blue marker: P1 (x-axis)
+# purple marker: P2 (defines XY plane)
+# black marker: P3 (defines handedness of coordinate system)
 
 def prettify(elem):
     """Return a pretty-printed XML string for the Element."""
@@ -112,10 +121,17 @@ def main(**deps):
             SaveArgs.position = event.value["position"]
             SaveArgs.rotation = event.value["rotation"][:3]
             return
-        waypoint_num = event.key.split("_")[-1]
-        if waypoint_num.isdigit() and int(waypoint_num) < len(SaveArgs.waypoints):
-            SaveArgs.waypoints[int(waypoint_num)]["position"] = event.value["position"]
-            SaveArgs.waypoints[int(waypoint_num)]["rotation"] = event.value["rotation"][:3]
+        
+        key_parts = event.key.split("_")
+        if len(key_parts) < 2:
+            return
+        obj_type, obj_num = key_parts[0], key_parts[-1]
+        if obj_type == "waypoint" and obj_num.isdigit() and int(obj_num) < len(SaveArgs.waypoints):
+            SaveArgs.waypoints[int(obj_num)]["position"] = event.value["position"]
+            SaveArgs.waypoints[int(obj_num)]["rotation"] = event.value["rotation"][:3]
+        elif obj_type == "marker" and obj_num.isdigit() and int(obj_num) < len(SaveArgs.markers):
+            SaveArgs.markers[int(obj_num)]["position"] = event.value["position"]
+            SaveArgs.markers[int(obj_num)]["rotation"] = event.value["rotation"][:3]
 
     @app.add_handler("INPUT")
     async def s(event: ClientEvent, session: VuerSession):
@@ -180,10 +196,81 @@ def main(**deps):
                     key=f"sphere_{next_waypoint_key}",
                 ),
                 key=f"waypoint_{next_waypoint_key}",
-                position=[0, 0, 5],
+                position=[0, 0, 3],
             )
 
-            print("Created new", SaveArgs.waypoints)
+            print("Created new waypoint", SaveArgs.waypoints)
+
+        elif key == "m":
+            # Add new marker
+            next_marker_key = str(len(SaveArgs.markers))
+            SaveArgs.markers.append(
+                {
+                    "position": [0, 0, 0],
+                    "rotation": [0, 0, 0],
+                }
+            )
+            # add new movable
+            session.upsert @ Movable(
+                Sphere(
+                    args=[0.1, 16, 16], 
+                    scale=0.3,
+                    position=[0, 0, 0],
+                    material=dict(color=MARKER_COLORS[int(next_marker_key)]),
+                    key=f"sphere_{next_marker_key}",
+                ),
+                key=f"marker_{next_marker_key}",
+                position=[0, 0, 3],
+            )
+
+            print("Created new marker", SaveArgs.markers)
+
+        elif key == "t":
+            # Assertions for proper marker setup
+            assert len(SaveArgs.markers) == 4, f"we need 4 markers, got {len(SaveArgs.markers)}"
+            
+            # Compute transformation
+            transform_matrix = compute_alignment_transform(
+                np.array([marker["position"].copy() for marker in SaveArgs.markers])
+            )
+
+            position = transform_matrix[:3, 3]
+            rotation = list(transforms3d.euler.mat2euler(transform_matrix[:3, :3], axes='rxyz'))
+
+            # Apply transformation to mesh
+            session.upsert(Movable(
+                TriMesh(
+                    key="trimesh", 
+                    vertices=np.array(mesh.vertices),
+                    faces=np.array(mesh.faces),
+                    color="gray",
+                ),
+                key="mesh",
+                position=position.tolist(),
+                rotation=rotation
+                )
+            )
+            SaveArgs.position = position.tolist()
+            SaveArgs.rotation = rotation
+
+            # Apply transformation to markers
+            for i in range(4):
+                marker_pos = np.append(SaveArgs.markers[i]["position"], 1)  # homogeneous coordinates
+                transformed_pos = (transform_matrix @ marker_pos)[:3]  # back to 3D coordinates
+                SaveArgs.markers[i]["position"] = transformed_pos.tolist()
+                session.upsert @ Movable(
+                    Sphere(
+                        args=[0.1, 16, 16], 
+                        scale=0.3,
+                        position=[0, 0, 0],
+                        material=dict(color=MARKER_COLORS[i]),
+                        key=f"sphere_{i}",
+                    ),
+                    key=f"marker_{i}",
+                    position=transformed_pos.tolist()
+                )
+
+            print("Transformed mesh and markers to align with requirements")
 
     @app.spawn(start=True)
     async def main(session):
@@ -218,7 +305,7 @@ def main(**deps):
                         InputBox(
                             key="text_input",
                             # value="",
-                            defaultValue="save : 's' + enter, load next waypoint : 'n' + enter",
+                            defaultValue="save : 's' + enter, load next waypoint : 'n' + enter, load next marker : 'm' + enter, transform mesh : 't' + enter",
                             clearOnSubmit=True,
                             style={
                                 "flex": "none",
