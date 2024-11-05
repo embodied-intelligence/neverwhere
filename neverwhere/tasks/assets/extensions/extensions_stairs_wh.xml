@@ -1,0 +1,70 @@
+<mujoco model="examples/stairs">
+    <asset>
+        <material name="M_TraficCone_Main" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <material name="M_TraficCone_Additional" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <mesh file="../cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_0.obj" scale="0.005 0.005 0.005"/>
+        <mesh file="../cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_1.obj" scale="0.005 0.005 0.005"/>
+    </asset>
+    <default>
+        <default class="traffic_cone">
+            <geom type="mesh" group="2" contype="0" conaffinity="0" euler="1.57 0 0"/>
+        </default>
+    </default>
+
+    <worldbody>
+        <body name="0" pos="0.0 0 0">
+            <body name="scene-group">
+                <body name="step-01" pos="2 0 0">
+                    <geom size="0.3048 2.25 0.127" name="step-01" type="box" material="terrain"/>
+                    <body name="waypoint-00" pos="-0.1624 0 0.127">
+                        <geom name="cone-00_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional"
+                              class="traffic_cone"/>
+                        <geom name="cone-00_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main"
+                              class="traffic_cone"/>
+                    </body>
+                </body>
+                <body name="step-02" pos="2.3048 0 0.127">
+                    <geom size="0.3048 2.25 0.127" name="step-02" type="box" material="terrain"/>
+                </body>
+                <body name="step-03" pos="2.6096 0 0.254">
+                    <geom size="0.3048 2.25 0.127" name="step-03" type="box" material="terrain"/>
+                    <body name="waypoint-01" pos="-0.1624 0 0.127">
+                        <geom name="cone-01_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional"
+                              class="traffic_cone"/>
+                        <geom name="cone-01_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main"
+                              class="traffic_cone"/>
+                    </body>
+                </body>
+                <body name="step-04" pos="2.9144 0 0.381">
+                    <geom size="0.3048 2.25 0.127" name="step-04" type="box" material="terrain"/>
+                </body>
+                <body name="step-05" pos="3.2192 0 0.508">
+                    <geom size="0.3048 2.25 0.127" name="step-05" type="box" material="terrain"/>
+                    <body name="waypoint-02" pos="-0.1624 0 0.127">
+                        <geom name="cone-02_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional"
+                              class="traffic_cone"/>
+                        <geom name="cone-02_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main"
+                              class="traffic_cone"/>
+                    </body>
+                </body>
+                <body name="top-01" pos="7.2192 0 0.635">
+                    <geom size="4 5 0.127" name="top-01" type="box" material="terrain"/>
+                    <body name="waypoint-03" pos="-2 0 0.127">
+                        <geom name="cone-03_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional"
+                              class="traffic_cone"/>
+                        <geom name="cone-03_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main"
+                              class="traffic_cone"/>
+                    </body>
+                </body>
+            </body>
+            <body name="wall-left" pos="4 2.25 0">
+                <geom size="3.2192 0.1 0.75" name="wall-left" type="box" material="terrain"/>
+            </body>
+            <body name="wall-right" pos="4 -2.25 0">
+                <geom size="3.2192 0.1 0.75" name="wall-right" type="box" material="terrain"/>
+            </body>
+        </body>
+    </worldbody>
+</mujoco>

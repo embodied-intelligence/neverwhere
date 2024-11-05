@@ -1,3 +1,6 @@
+neverwhere_envs/datasets
+neverwhere_envs/polycam_clean
+
 # OS
 .DS_Store
 # PyCharm project files

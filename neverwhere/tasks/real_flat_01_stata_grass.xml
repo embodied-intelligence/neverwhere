@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<mujoco model="go1 scene">
+    <include file="go1/gabe_go1.xml"/>
+    <option timestep="0.005"/>
+    <statistic center="0 0 0.1" extent="1"/>
+    <default>
+        <default class="traffic_cone">
+            <geom type="mesh" group="2" contype="0" conaffinity="0" euler="1.57 0 0"/>
+        </default>
+    </default>
+    <visual>
+        <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+        <global azimuth="-130" elevation="-20"/>
+    </visual>
+    <asset>
+        <mesh name="mesh" file="datasets/real_flat_01_stata_grass/meshes/real_flat_01_stata_grass.obj">
+            <plugin instance="sdf"/>
+        </mesh>
+        <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
+        <texture type="skybox" builtin="flat" rgb1="0.6 0.8 1" rgb2=".6 .8 1" width="256" height="256"/>
+        <texture type="cube" name="soccer" file="assets/soccer.png" gridsize="3 3" gridlayout=".U.LFR.DB"/>
+        <texture type="cube" name="basketball" fileleft="./assets/basketball/L.png"
+                 fileright="./assets/basketball/R.png" filefront="./assets/basketball/F.png"
+                 fileback="./assets/basketball/B.png" fileup="./assets/basketball/U.png"
+                 filedown="./assets/basketball/D.png"/>
+        <!--        <texture type="2d" name="groundplane" file="assets/ground/grass.png"/>-->
+        <texture type="2d" name="groundplane" builtin="flat" rgb1="0 1 0" rgb2="0 1 0" width="256" height="256"/>
+        <!--                <texture type="2d" name="terrain" file="assets/ground/asphalt.png"/>-->
+        <texture type="2d" name="terrain" builtin="flat" rgb1="1 0 0" rgb2="0 1 0" width="256" height="256"/>
+        <material name="soccer" texture="soccer" texrepeat="1 1" reflectance="0.2"/>
+        <material name="basketball" texture="basketball" texrepeat="1 1" reflectance="0.2"/>
+        <material name="groundplane" texture="groundplane"/>
+        <material name="terrain" texture="terrain"/>
+        <material name="M_TraficCone_Main" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <material name="M_TraficCone_Additional" specular="0.54038215" shininess="0.025"
+                  rgba="0.54038215 0.54038215 0.54038215 1"/>
+        <mesh file="assets/cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_0.obj" scale="0.005 0.005 0.005"/>
+        <mesh file="assets/cone/SM_TrafficCone_V0_4/SM_TrafficCone_V0_4_1.obj" scale="0.005 0.005 0.005"/>
+    </asset>
+
+    <extension>
+        <plugin plugin="mujoco.sdf.sdflib">
+            <instance name="sdf">
+                <config key="aabb" value="0"/>
+            </instance>
+        </plugin>
+    </extension>
+
+    <option sdf_iterations="20" sdf_initpoints="40"/>
+
+    <worldbody>
+        <light pos="0 0 1.5" dir="0 0 -1" directional="true"/>
+        <light name="light_2" directional="true" ambient="0.1 0.1 0.1" diffuse="0.8 0.8 0.8" specular="0 0 0"
+               castshadow="false" pos="0.4 0.6 3" dir="-0.1 -0.5 -0.5" active="true"/>
+        <light name="light_3" directional="true" ambient="0.01 0.01 0.01" diffuse="0.8 0.8 0.8" specular="0 0 0"
+               castshadow="false" pos="-4 0.25 0.15" dir="0.2 0 -0.05" active="true"/>
+        <body name="scene-group-2">
+            <body name="mesh" pos="0.937703251519872 0.9842275058610463 0.7275034538911141" euler="0 0 0">
+                <geom type="sdf" name="mesh_geom" mesh="mesh" material="mesh_material">
+                    <plugin instance="sdf"/>
+                </geom>
+            </body>
+            <!--            <body name="ground" pos="0 0 0">-->
+            <!--                <geom size="50.0 50.0 1" type="plane" material="groundplane"/>-->
+            <!--            </body>-->
+        </body>
+        <body name="ball" pos="10 0 1" mocap="true">
+            <geom name="soccer" type="sphere" size="0.15" material="soccer" euler="0 0 -1.57"/>
+            <geom name="basketball" type="sphere" size="0.15" material="basketball"/>
+            <geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone"/>
+            <geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone"/>
+        </body>
+    </worldbody>
+</mujoco>

@@ -1,0 +1,707 @@
+from neverwhere import add_env
+from neverwhere.tasks import chase
+from neverwhere.tasks import parkour
+from neverwhere.tasks.base.ball import Ball
+
+add_env(
+    env_id="Real-heightmap-gaps_226_blue_carpet_v4-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="gaps_226_blue_carpet_v4",
+        xml_path="gaps_226_blue_carpet_v4.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        spawn_x_rand=0.1,
+        spawn_y_rand=0.1,
+        spawn_yaw_rand=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_stata_one_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_stata_one_v1",
+        xml_path="hurdle_stata_one_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        spawn_x_rand=0.2,
+        spawn_y_rand=0.2,
+        spawn_yaw_rand=0.2,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_stata_v2-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_stata_v2",
+        xml_path="hurdle_stata_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        spawn_x_rand=0.2,
+        spawn_y_rand=0.2,
+        spawn_yaw_rand=0.2,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-gaps_grassy_courtyard_v2-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="gaps_grassy_courtyard_v2",
+        xml_path="gaps_grassy_courtyard_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        spawn_x_rand=0.1,
+        spawn_y_rand=0.1,
+        spawn_yaw_rand=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_one_dark_grassy_courtyard_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_one_dark_grassy_courtyard_v1",
+        xml_path="hurdle_one_dark_grassy_courtyard_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_one_blue_carpet_v2-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_one_blue_carpet_v2",
+        xml_path="hurdle_one_blue_carpet_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_226_blue_carpet_v3-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_226_blue_carpet_v3",
+        xml_path="hurdle_226_blue_carpet_v3.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_one_light_grassy_courtyard_v3-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_one_light_grassy_courtyard_v3",
+        xml_path="hurdle_one_light_grassy_courtyard_v3.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-hurdle_three_grassy_courtyard_v2-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="hurdle_three_grassy_courtyard_v2",
+        xml_path="hurdle_three_grassy_courtyard_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-gaps_stata_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="gaps-stata_v1",
+        xml_path="gaps-stata_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        # platform is small
+        spawn_x_rand=0.1,
+        spawn_y_rand=0.1,
+        spawn_yaw_rand=0.1,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-building_31_stairs_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="building_31_stairs_v1",
+        xml_path="building_31_stairs_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stair_10_wh_afternoon_v1",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_stair_10_wh_afternoon_v1",
+        xml_path="real_stair_10_wh_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stairs_4_stairs2up_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="stairs_4_stairs2up_v1",
+        xml_path="stairs_4_stairs2up_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        stack_size=7,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stair_10_wh_afternoon_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_stair_10_wh_afternoon_v1",
+        xml_path="real_stair_10_wh_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stair_08_mc_afternoon_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_stair_08_mc_afternoon_v1",
+        xml_path="real_stair_08_mc_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stairs_backstairs_v5-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="stairs_backstairs_v5",
+        xml_path="stairs_backstairs_v5.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stairs_08_mc_afternoon_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_stair_08_mc_afternoon_v1",
+        xml_path="real_stair_08_mc_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-stairs_08_mc_afternoon_v1",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_stair_08_mc_afternoon_v1",
+        xml_path="real_stair_08_mc_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+    ),
+)
+
+add_env(
+    env_id="Real-vision-stairs_08_mc_afternoon_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_stair_08_mc_afternoon_v1",
+        xml_path="real_stair_08_mc_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-stairs_wh_evening_v2-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="stairs_wh_evening_v2",
+        xml_path="stairs_wh_evening_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        stack_size=7,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-stairs_08_mc_afternoon_v1-cones",
+    entrypoint=parkour.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_stair_08_mc_afternoon_v1",
+        xml_path="real_stair_08_mc_afternoon_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        imagnet_pipe=False,
+        stack_size=5,
+    ),
+)
+
+add_env(
+    env_id="Real-heightmap-chase-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        sampling_period=100,
+    ),
+)
+add_env(
+    env_id="Real-heightmap-chase-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        sampling_period=100,
+    ),
+)
+add_env(
+    env_id="Real-heightmap-chase-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="heightmap_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-soccer-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-basketball-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-cones-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-soccer-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-basketball-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-cones-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-soccer-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-basketball-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-chase-cones-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-soccer-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-basketball-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-cones-real_flat_01_stata_grass",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_01_stata_grass",
+        xml_path="real_flat_01_stata_grass.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-soccer-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-basketball-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-cones-real_flat_02_wh_evening",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_02_wh_evening",
+        xml_path="real_flat_02_wh_evening.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-soccer-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="soccer",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-basketball-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="basketball",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)
+
+add_env(
+    env_id="Real-vision-5-chase-cones-real_flat_03_stata_indoor",
+    entrypoint=chase.entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_splat",
+        dataset_name="real_flat_03_stata_indoor",
+        xml_path="real_flat_03_stata_indoor.xml",
+        task_cls=Ball,
+        n_proprio=53,
+        splat_render_keys=["rgb"],
+        chase_target="cone",
+        sampling_period=100,
+        stack_size=5,
+        flatten_stack=True,
+    ),
+)

@@ -1,0 +1,16 @@
+<mujoco model="SM_TrafficCone_V0_4">
+    <compiler angle="radian"/>
+    <asset>
+        <material name="M_TraficCone_Main" specular="0.3068755176666667" shininess="0.025"
+                  rgba="0.8005128 0.10520147 0.014912283 1"/>
+        <material name="M_TraficCone_Additional" specular="0.54038215" shininess="0.025"
+                  rgba="0.54038215 0.54038215 0.54038215 1"/>
+        <mesh file="SM_TrafficCone_V0_4_0.obj" scale="0.005 0.005 0.005"/>
+        <mesh file="SM_TrafficCone_V0_4_1.obj" scale="0.005 0.005 0.005"/>
+    </asset>
+    <default>
+        <default class="traffic_cone">
+            <geom type="mesh" group="2" contype="0" conaffinity="0" euler="1.57 0 0"/>
+        </default>
+    </default>
+</mujoco>
