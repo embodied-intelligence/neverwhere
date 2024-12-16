@@ -22,8 +22,6 @@ def run_densify(input_mvs, output_mvs, working_dir, gpu_index='-1', verbose=1):
     cmd = f'DensifyPointCloud -i {input_mvs} \
         -o {output_mvs} \
         -w {working_dir} \
-        --resolution-level 0 \
-        --max-resolution 256 \
         --cuda-device {gpu_index} \
         -v {verbose}'
     bash_run(cmd)
