@@ -5,10 +5,11 @@ from pathlib import Path
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
 from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
-from neverwhere_envs.runners.geometry_processor import process_scene as geometry_main
+from neverwhere_envs.runners.geometry_processor import main as geometry_main
 from neverwhere_envs.runners.gsplat_runner import main as gsplat_main
 from neverwhere_envs.runners.gsplat2d_runner import main as gsplat2d_main
 from neverwhere_envs.runners.gsplat_processor import main as gsplat_export_main
+from neverwhere_envs.runners.openmvs_extractor import main as openmvs_export_main
 
 def check_colmap(scene_dir, colmap_path):
     # Count total images in images directory
@@ -52,6 +53,7 @@ def check_colmap(scene_dir, colmap_path):
     return True
 
 def main():
+    # TODO: separate args for each step, make each step an entry and a dictionary
     parser = argparse.ArgumentParser(description="Launch Neverwhere reconstruction pipeline")
     parser.add_argument("--scene-name", required=True, help="Name of the scene to process, or 'all' to process all scenes")
     parser.add_argument("--dataset-dir", required=True, help="Path to the datasets directory")
@@ -62,6 +64,10 @@ def main():
     parser.add_argument("--gs-type", type=str, choices=['3dgs', '2dgs', '2dgs+3dgs'], default='3dgs',
                        help="Type of Gaussian Splatting to use (default: 3dgs)")
     parser.add_argument("--skip-gs", action="store_true", help="Skip Gaussian Splatting training")
+    parser.add_argument("--skip-downsample", action="store_true", help="Skip downsampling")
+    parser.add_argument("--depth-keys", nargs='+', default=['depth', 'confidence'],
+                      choices=['depth', 'confidence', 'normal', 'views'],
+                      help='Types of depth data to process (default: depth confidence)')
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -138,13 +144,14 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     
     # Step 1: Process images
     print("\n=== Processing images ===")
-    delete_cache = downsample_main(
-        input_dir=str(scene_dir), 
-        downsample=args.downsample,
-        downsample_threshold=args.downsample_threshold,
-    )
+    if not args.skip_downsample:
+        delete_cache = downsample_main(
+            input_dir=str(scene_dir), 
+            downsample=args.downsample,
+            downsample_threshold=args.downsample_threshold,
+        )
     
-    if delete_cache:
+        if delete_cache:
         for folder in ["colmap", "openmvs", "geometry", "3dgs", "2dgs"]:
             folder_path = scene_dir / folder
             if folder_path.exists():
@@ -166,7 +173,7 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
             f.write("COLMAP Processing Failed\n")
             f.write("Both sequential and exhaustive matching methods failed\n")
             
-        for folder in ["colmap", "openmvs", "geometry", "3dgs", "2dgs"]:
+        for folder in ["colmap", "openmvs", "geometry", "geo2d", "3dgs", "2dgs"]:
             folder_path = scene_dir / folder
             if folder_path.exists():
                 shutil.rmtree(folder_path)
@@ -181,11 +188,15 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         gpu_index=args.gpu_index
     )
     
-    # Step 4: Process geometry
+    # Step 4: Process depth maps from OpenMVS
+    print("\n=== Processing depth maps ===")
+    openmvs_export_main(str(scene_dir), verbose=True, keys=args.depth_keys)
+    
+    # Step 5: Process geometry
     print("\n=== Processing geometry ===")
     geometry_main(str(scene_dir))
     
-    # Step 5: Train Gaussian Splatting
+    # Step 6: Train Gaussian Splatting
     if not args.skip_gs:
         if args.gs_type == '2dgs+3dgs':
             run_3dgs_training(scene_dir, gsplat_3d_dir, args.gpu_index)
@@ -195,7 +206,7 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         else:  # 2dgs
             run_2dgs_training(scene_dir, gsplat_2d_dir, args.gpu_index)
 
-        # Step 6: Export trained 3DGS model to PLY
+        # Step 7: Export trained 3DGS model to PLY
         if args.gs_type in ['3dgs', '2dgs+3dgs']:
             print("\n=== Exporting 3DGS model to PLY ===")
             
