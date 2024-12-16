@@ -76,7 +76,7 @@ def read_dmap(filename):
             'views_map': views_map
         }
 
-def process_scene(scene_dir: str, verbose: bool = False, keys=None):
+def main(scene_dir: str, verbose: bool = False, keys=None):
     """Process depth maps from OpenMVS output and save them in geo2d directory.
     
     Args:
@@ -155,4 +155,4 @@ if __name__ == "__main__":
                       help='Types of data to process')
     
     args = parser.parse_args()
-    process_scene(args.scene_dir, args.verbose, args.keys)
+    main(args.scene_dir, args.verbose, args.keys)

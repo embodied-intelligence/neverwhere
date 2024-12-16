@@ -152,10 +152,10 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         )
     
         if delete_cache:
-        for folder in ["colmap", "openmvs", "geometry", "3dgs", "2dgs"]:
-            folder_path = scene_dir / folder
-            if folder_path.exists():
-                shutil.rmtree(folder_path)
+            for folder in ["colmap", "openmvs", "geometry", "geo2d", "3dgs", "2dgs"]:
+                folder_path = scene_dir / folder
+                if folder_path.exists():
+                    shutil.rmtree(folder_path)
     
     # Step 2: Run COLMAP pipeline
     print("\n=== Running COLMAP pipeline ===")

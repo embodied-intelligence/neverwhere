@@ -217,7 +217,7 @@ def combine_point_clouds(output_dir, sphere_ratio=0.8):
     o3d.io.write_point_cloud(output_path, combined_pcd)
     print(f"Saved combined point cloud to {output_path}")
 
-def process_scene(scene_dir):
+def main(scene_dir):
     """Process all geometry files for a scene."""
     # Create geometry directory
     geometry_dir = os.path.join(scene_dir, 'geometry')
@@ -252,4 +252,4 @@ if __name__ == "__main__":
     parser.add_argument('--scene-dir', required=True, help='Path to the scene directory')
     
     args = parser.parse_args()
-    process_scene(args.scene_dir)
+    main(args.scene_dir)
