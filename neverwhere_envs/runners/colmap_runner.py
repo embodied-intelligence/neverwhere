@@ -21,11 +21,8 @@ def run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False
             --image_path {} \
             --ImageReader.single_camera 1 \
             --ImageReader.camera_model SIMPLE_RADIAL \
-            --SiftExtraction.max_image_size 5000  \
             --SiftExtraction.estimate_affine_shape 0 \
-            --SiftExtraction.domain_size_pooling 1 \
             --SiftExtraction.use_gpu 1 \
-            --SiftExtraction.max_num_features 16384 \
             --SiftExtraction.gpu_index {}'.format(db_file, img_dir, gpu_index)
     bash_run(cmd)
 
@@ -34,7 +31,6 @@ def run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False
             --database_path {} \
             --SiftMatching.guided_matching 1 \
             --SiftMatching.use_gpu 1 \
-            --SiftMatching.max_num_matches 65536 \
             --SiftMatching.gpu_index {}'.format(db_file, gpu_index)
 
     bash_run(cmd)
@@ -51,11 +47,8 @@ def run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=False
             --image_path {} \
             --ImageReader.single_camera 1 \
             --ImageReader.camera_model SIMPLE_RADIAL \
-            --SiftExtraction.max_image_size 5000 \
             --SiftExtraction.estimate_affine_shape 0 \
-            --SiftExtraction.domain_size_pooling 1 \
             --SiftExtraction.use_gpu 1 \
-            --SiftExtraction.max_num_features 16384 \
             --SiftExtraction.gpu_index {}'.format(db_file, img_dir, gpu_index)
     bash_run(cmd)
 
@@ -64,7 +57,6 @@ def run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=False
             --database_path {} \
             --SiftMatching.guided_matching 1 \
             --SiftMatching.use_gpu 1 \
-            --SiftMatching.max_num_matches 65536 \
             --SiftMatching.gpu_index {}'.format(db_file, gpu_index)
     bash_run(cmd)
 
@@ -74,9 +66,7 @@ def run_sfm(img_dir, db_file, sparse_dir):
     cmd = ' mapper \
             --database_path {} \
             --image_path {} \
-            --output_path {} \
-            --Mapper.tri_min_angle 3.0 \
-            --Mapper.filter_min_tri_angle 3.0'.format(db_file, img_dir, sparse_dir)
+            --output_path {}'.format(db_file, img_dir, sparse_dir)
  
     bash_run(cmd)
 
@@ -103,14 +93,14 @@ def run_model_converter(input_dir, sparse_dir):
             --output_type TXT'.format(input_dir, sparse_dir)
     bash_run(cmd)
 
-def check_matching_results(sparse_dir):
+def check_matching_results(log_dir, img_dir):
     """Check the percentage of valid images after matching"""
-    images_txt = os.path.join(sparse_dir, 'images.txt')
+    images_txt = os.path.join(log_dir, 'images.txt')
     if not os.path.exists(images_txt):
-        return 0.0
+        raise FileNotFoundError(f"images.txt not found in {log_dir}")
         
     valid_images = 0
-    total_images = len([f for f in os.listdir(os.path.dirname(sparse_dir)) 
+    total_images = len([f for f in os.listdir(img_dir) 
                        if f.endswith(('.jpg', '.png'))])
     
     with open(images_txt, 'r') as f:
@@ -150,8 +140,8 @@ def main(img_dir, output_dir, gpu_index='-1'):
     print("\nAttempting sequential matching...")
     run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False)
     run_sfm(img_dir, db_file, sparse_dir)
-    
-    valid_percentage = check_matching_results(sparse_dir + '/0')
+    run_model_converter(sparse_dir + '/0', sparse_dir)
+    valid_percentage = check_matching_results(sparse_dir, img_dir)
     
     # If sequential fails, try exhaustive matching
     if valid_percentage < 50:
@@ -167,12 +157,17 @@ def main(img_dir, output_dir, gpu_index='-1'):
         # Try exhaustive matching
         run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=True)
         run_sfm(img_dir, db_file, sparse_dir)
-        
-        valid_percentage = check_matching_results(sparse_dir + '/0')
+        run_model_converter(sparse_dir + '/0', sparse_dir)
+        valid_percentage = check_matching_results(sparse_dir, img_dir)
         
     if valid_percentage >= 50:
         # Proceed with MVS preparation only if we have good results
         prepare_mvs(img_dir, sparse_dir + '/0', mvs_dir)
+        # remove all txt files in sparse_dir
+        for file in os.listdir(sparse_dir):
+            if file.endswith('.txt'):
+                os.remove(os.path.join(sparse_dir, file))
+        # convert mvs sparse to txt
         run_model_converter(mvs_dir + '/sparse', sparse_dir)
         return True
     else:
