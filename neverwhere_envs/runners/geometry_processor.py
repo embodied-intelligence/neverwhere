@@ -1,9 +1,8 @@
 import os
 import numpy as np
+import trimesh
 import open3d as o3d
 from PIL import Image
-import subprocess
-import shutil
 
 def read_points3D_text(path):
     """Read points3D.txt file and return points and colors."""
@@ -64,7 +63,7 @@ def extract_colmap_points(colmap_dir, output_dir):
 
 def process_textured_mesh(mesh_path, output_dir, num_samples=100000):
     """Convert textured mesh to colored point cloud with sampling."""
-    output_path = os.path.join(output_dir, 'pcd_openmvs_colored.ply')
+    output_path = os.path.join(output_dir, 'openmvs_dense_colored.ply')
     if os.path.exists(output_path):
         print(f"Skipping sampled point cloud: {output_path} already exists")
         return
@@ -178,46 +177,46 @@ def process_collision_geometry(mesh_path, output_dir, export_invert=True):
         o3d.io.write_triangle_mesh(inverted_simplified_path, simplified_inverted)
         print(f"Saved simplified inverted collision geometry to {inverted_simplified_path}")
 
-def combine_point_clouds(output_dir, sphere_ratio=0.8):
-    """Combine COLMAP and OpenMVS point clouds."""
-    output_path = os.path.join(output_dir, 'pcd_gsplat_init.ply')
-    if os.path.exists(output_path):
-        print(f"Skipping combined point cloud: {output_path} already exists")
-        return
+# def combine_point_clouds(output_dir, sphere_ratio=0.8):
+#     """Combine COLMAP and OpenMVS point clouds."""
+#     output_path = os.path.join(output_dir, 'pcd_gsplat_init.ply')
+#     if os.path.exists(output_path):
+#         print(f"Skipping combined point cloud: {output_path} already exists")
+#         return
     
-    colmap_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_colmap.ply'))
-    openmvs_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_openmvs_colored.ply'))
+#     colmap_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_colmap.ply'))
+#     openmvs_pcd = o3d.io.read_point_cloud(os.path.join(output_dir, 'pcd_openmvs_colored.ply'))
     
-    # Get vertices and colors
-    vertices1 = np.asarray(openmvs_pcd.points)
-    colors1 = np.asarray(openmvs_pcd.colors)
-    vertices2 = np.asarray(colmap_pcd.points)
-    colors2 = np.asarray(colmap_pcd.colors)
+#     # Get vertices and colors
+#     vertices1 = np.asarray(openmvs_pcd.points)
+#     colors1 = np.asarray(openmvs_pcd.colors)
+#     vertices2 = np.asarray(colmap_pcd.points)
+#     colors2 = np.asarray(colmap_pcd.colors)
     
-    # Calculate bounding sphere
-    center = np.mean(vertices1, axis=0)
-    radius = np.max(np.linalg.norm(vertices1 - center, axis=1))
-    sphere_radius = radius * sphere_ratio
+#     # Calculate bounding sphere
+#     center = np.mean(vertices1, axis=0)
+#     radius = np.max(np.linalg.norm(vertices1 - center, axis=1))
+#     sphere_radius = radius * sphere_ratio
     
-    # Combine point clouds
-    distances = np.linalg.norm(vertices2 - center, axis=1)
-    outer_mask = distances > sphere_radius
-    outer_vertices = vertices2[outer_mask]
-    outer_colors = colors2[outer_mask]
+#     # Combine point clouds
+#     distances = np.linalg.norm(vertices2 - center, axis=1)
+#     outer_mask = distances > sphere_radius
+#     outer_vertices = vertices2[outer_mask]
+#     outer_colors = colors2[outer_mask]
     
-    combined_vertices = np.vstack((vertices1, outer_vertices))
-    combined_colors = np.vstack((colors1, outer_colors))
+#     combined_vertices = np.vstack((vertices1, outer_vertices))
+#     combined_colors = np.vstack((colors1, outer_colors))
     
-    # Create and save combined point cloud
-    combined_pcd = o3d.geometry.PointCloud()
-    combined_pcd.points = o3d.utility.Vector3dVector(combined_vertices)
-    combined_pcd.colors = o3d.utility.Vector3dVector(combined_colors)
+#     # Create and save combined point cloud
+#     combined_pcd = o3d.geometry.PointCloud()
+#     combined_pcd.points = o3d.utility.Vector3dVector(combined_vertices)
+#     combined_pcd.colors = o3d.utility.Vector3dVector(combined_colors)
     
-    output_path = os.path.join(output_dir, 'pcd_gsplat_init.ply')
-    o3d.io.write_point_cloud(output_path, combined_pcd)
-    print(f"Saved combined point cloud to {output_path}")
+#     output_path = os.path.join(output_dir, 'pcd_gsplat_init.ply')
+#     o3d.io.write_point_cloud(output_path, combined_pcd)
+#     print(f"Saved combined point cloud to {output_path}")
 
-def main(scene_dir):
+def main(scene_dir, has_refined_mesh=False, num_samples=100000):
     """Process all geometry files for a scene."""
     # Create geometry directory
     geometry_dir = os.path.join(scene_dir, 'geometry')
@@ -231,19 +230,22 @@ def main(scene_dir):
     # Process OpenMVS files
     openmvs_dir = os.path.join(scene_dir, 'openmvs')
     if os.path.exists(openmvs_dir):
-        textured_mesh_path = os.path.join(openmvs_dir, 'model_dense_mesh_refine_texture.ply')
-        collision_mesh_path = os.path.join(openmvs_dir, 'model_dense_mesh_refine.ply')
+        textured_mesh_path = os.path.join(openmvs_dir, 'model_dense_recon_texture.ply')
+        collision_mesh_path = os.path.join(openmvs_dir, 'model_dense_refine.ply') if has_refined_mesh \
+            else os.path.join(openmvs_dir, 'model_dense_recon.ply')
         
         if os.path.exists(textured_mesh_path):
-            process_textured_mesh(textured_mesh_path, geometry_dir)
+            process_textured_mesh(textured_mesh_path, geometry_dir, num_samples=num_samples)
         
         if os.path.exists(collision_mesh_path):
             process_collision_geometry(collision_mesh_path, geometry_dir)
     
+    # NOTE: this is used in previous version
+    #       In current version, we use openmvs_dense_colored.ply as the initial point cloud, no sfm points needed
     # Combine point clouds
-    if os.path.exists(os.path.join(geometry_dir, 'pcd_colmap.ply')) and \
-       os.path.exists(os.path.join(geometry_dir, 'pcd_openmvs_colored.ply')):
-        combine_point_clouds(geometry_dir)
+    # if os.path.exists(os.path.join(geometry_dir, 'pcd_colmap.ply')) and \
+    #    os.path.exists(os.path.join(geometry_dir, 'pcd_openmvs_colored.ply')):
+    #     combine_point_clouds(geometry_dir)
 
 if __name__ == "__main__":
     import argparse

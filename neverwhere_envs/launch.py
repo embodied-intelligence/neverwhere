@@ -2,6 +2,7 @@ import os
 import shutil
 import argparse
 from pathlib import Path
+
 from neverwhere_envs.runners.sort_images import main as downsample_main
 from neverwhere_envs.runners.colmap_runner import main as colmap_main
 from neverwhere_envs.runners.openmvs_runner import main as openmvs_main
@@ -70,6 +71,8 @@ def main():
     parser.add_argument("--depth-keys", nargs='+', default=['depth', 'confidence'],
                       choices=['depth', 'confidence', 'normal', 'views'],
                       help='Types of depth data to process (default: depth confidence)')
+    #  openmvs
+    parser.add_argument("--refine-mesh", action="store_true", help="Refine mesh using OpenMVS")
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -187,7 +190,8 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
         working_dir=str(openmvs_dir),
         colmap_dir=str(colmap_path),
         image_dir=str(images_dir),
-        gpu_index=args.gpu_index
+        gpu_index=args.gpu_index,
+        refine_mesh=args.refine_mesh
     )
     
     # Step 4: Process depth maps from OpenMVS
@@ -196,7 +200,11 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     
     # Step 5: Process geometry
     print("\n=== Processing geometry ===")
-    geometry_main(str(scene_dir))
+    geometry_main(
+        str(scene_dir),
+        has_refined_mesh=args.refine_mesh,
+        num_samples=500000
+    )
     
     # Step 6: Train Gaussian Splatting
     if not args.skip_gs:

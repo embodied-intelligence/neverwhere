@@ -57,7 +57,7 @@ def run_texture(input_mvs, input_mesh, output_mvs, working_dir, gpu_index='-1', 
         --resolution-level {resolution_level}'
     bash_run(cmd)
 
-def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
+def main(working_dir, colmap_dir, image_dir, gpu_index='-1', refine_mesh=False):
     """
     Run OpenMVS pipeline
     Args:
@@ -75,10 +75,13 @@ def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
     dense_ply = os.path.join(working_dir, 'model_dense.ply')
     recon_mvs = os.path.join(working_dir, 'model_dense_recon.mvs')
     recon_ply = os.path.join(working_dir, 'model_dense_recon.ply')
-    refine_mvs = os.path.join(working_dir, 'model_dense_mesh_refine.mvs')
-    refine_ply = os.path.join(working_dir, 'model_dense_mesh_refine.ply')
-    texture_mvs = os.path.join(working_dir, 'model_dense_mesh_refine_texture.mvs')
-    texture_ply = os.path.join(working_dir, 'model_dense_mesh_refine_texture.ply')
+    recon_texture_mvs = os.path.join(working_dir, 'model_dense_recon_texture.mvs')
+    recon_texture_ply = os.path.join(working_dir, 'model_dense_recon_texture.ply')
+    if refine_mesh:
+        refine_mvs = os.path.join(working_dir, 'model_dense_refine.mvs')
+        refine_ply = os.path.join(working_dir, 'model_dense_refine.ply')
+        refine_texture_mvs = os.path.join(working_dir, 'model_dense_refine_texture.mvs')
+        refine_texture_ply = os.path.join(working_dir, 'model_dense_refine_texture.ply')
 
     # Run pipeline with GPU index for all steps
     if not os.path.exists(colmap_mvs):
@@ -95,16 +98,22 @@ def main(working_dir, colmap_dir, image_dir, gpu_index='-1'):
         run_reconstruct(dense_mvs, recon_mvs, dense_ply, working_dir, gpu_index)
     else:
         print(f"Skipping reconstruct: {recon_ply} already exists")
-
-    if not os.path.exists(refine_ply):
-        run_refine(dense_mvs, recon_ply, refine_mvs, working_dir, gpu_index)
+        
+    if not os.path.exists(recon_texture_ply):
+        run_texture(dense_mvs, recon_ply, recon_texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
     else:
-        print(f"Skipping refine: {refine_ply} already exists")
+        print(f"Skipping texture: {recon_texture_ply} already exists")
+        
+    if refine_mesh:
+        if not os.path.exists(refine_ply):
+            run_refine(dense_mvs, recon_ply, refine_mvs, working_dir, gpu_index)
+        else:
+            print(f"Skipping refine: {refine_ply} already exists")
 
-    if not os.path.exists(texture_ply):
-        run_texture(dense_mvs, refine_ply, texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
-    else:
-        print(f"Skipping texture: {texture_ply} already exists")
+        if not os.path.exists(refine_texture_ply):
+            run_texture(dense_mvs, refine_ply, refine_texture_mvs, working_dir, gpu_index, decimate=0.1, resolution_level=2)
+        else:
+            print(f"Skipping texture: {refine_texture_ply} already exists")
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Run OpenMVS pipeline')
