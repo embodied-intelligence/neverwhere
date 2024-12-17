@@ -11,6 +11,8 @@ from neverwhere_envs.runners.gsplat2d_runner import main as gsplat2d_main
 from neverwhere_envs.runners.gsplat_processor import main as gsplat_export_main
 from neverwhere_envs.runners.openmvs_extractor import main as openmvs_export_main
 
+from neverwhere_envs.utils.gs_utils import DefaultStrategy
+
 def check_colmap(scene_dir, colmap_path):
     # Count total images in images directory
     images_dir = scene_dir / "images"
