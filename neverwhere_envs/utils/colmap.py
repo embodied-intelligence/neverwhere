@@ -311,11 +311,15 @@ class Dataset:
         split: str = "train",
         patch_size: Optional[int] = None,
         load_depths: bool = False,
+        load_normals: bool = False,
+        load_confidences: bool = False,
     ):
         self.parser = parser
         self.split = split
         self.patch_size = patch_size
         self.load_depths = load_depths
+        self.load_normals = load_normals
+        self.load_confidences = load_confidences
         indices = np.arange(len(self.parser.image_names))
         if split == "train":
             self.indices = indices[indices % self.parser.test_every != 0]
@@ -362,28 +366,29 @@ class Dataset:
         if mask is not None:
             data["mask"] = torch.from_numpy(mask).bool()
 
-        if self.load_depths:
-            # projected points to image plane to get depths
-            worldtocams = np.linalg.inv(camtoworlds)
+        if self.load_depths or self.load_normals or self.load_confidences:
+            # Load raw depth data from OpenMVS
             image_name = self.parser.image_names[index]
-            point_indices = self.parser.point_indices[image_name]
-            points_world = self.parser.points[point_indices]
-            points_cam = (worldtocams[:3, :3] @ points_world.T + worldtocams[:3, 3:4]).T
-            points_proj = (K @ points_cam.T).T
-            points = points_proj[:, :2] / points_proj[:, 2:3]  # (M, 2)
-            depths = points_cam[:, 2]  # (M,)
-            # filter out points outside the image
-            selector = (
-                (points[:, 0] >= 0)
-                & (points[:, 0] < image.shape[1])
-                & (points[:, 1] >= 0)
-                & (points[:, 1] < image.shape[0])
-                & (depths > 0)
-            )
-            points = points[selector]
-            depths = depths[selector]
-            data["points"] = torch.from_numpy(points).float()
-            data["depths"] = torch.from_numpy(depths).float()
+            base_name = image_name.split(".")[0]
+            geo2d_dir = os.path.join(self.parser.data_dir, "geo2d")
+
+            if self.load_depths:
+                depth_path = os.path.join(geo2d_dir, "depth", f"{base_name}.npy")
+                if os.path.exists(depth_path):
+                    depths = np.load(depth_path)
+                    data["depths"] = torch.from_numpy(depths).float()
+
+            if self.load_normals:
+                normal_path = os.path.join(geo2d_dir, "normal", f"{base_name}.npy")
+                if os.path.exists(normal_path):
+                    normals = np.load(normal_path)
+                    data["normals"] = torch.from_numpy(normals).float()
+
+            if self.load_confidences:
+                conf_path = os.path.join(geo2d_dir, "confidence", f"{base_name}.npy")
+                if os.path.exists(conf_path):
+                    confidences = np.load(conf_path)
+                    data["confidences"] = torch.from_numpy(confidences).float()
 
         return data
 

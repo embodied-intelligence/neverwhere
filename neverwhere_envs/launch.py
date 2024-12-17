@@ -89,38 +89,35 @@ def main():
     else:
         process_scene(args.scene_name, dataset_path, args)
     
-def run_3dgs_training(scene_dir, gsplat_3d_dir, gpu_index, strategy="default"):
-    from gsplat.strategy import DefaultStrategy, MCMCStrategy
+def run_3dgs_training(scene_dir, gsplat_3d_dir, gpu_index):
     print("\n=== Training 3DGS ===")
     
-    if strategy == "default":
-        gsplat_main(
-            data_dir=str(scene_dir),
-            result_dir=str(gsplat_3d_dir),
-            gpu_index=gpu_index,
-            init_type="openmvs",
-            random_bkgd=True,
-            disable_viewer=True,
-            pose_opt=True,
-            strategy=DefaultStrategy(verbose=True),
-        )
-    elif strategy == "mcmc":
-        gsplat_main(
-            data_dir=str(scene_dir),
-            result_dir=str(gsplat_3d_dir),
-            gpu_index=gpu_index,
-            init_type="openmvs",
-            random_bkgd=True,
-            disable_viewer=True,
-            pose_opt=True,
-            strategy=MCMCStrategy(verbose=True),
-            init_opa=0.5,
-            init_scale=0.1,
-            opacity_reg=0.01,
-            scale_reg=0.01,
-        )
-    else:
-        raise ValueError(f"Invalid strategy: {strategy}")
+    gsplat_main(
+        data_dir=str(scene_dir),
+        result_dir=str(gsplat_3d_dir),
+        gpu_index=gpu_index,
+        init_type="openmvs",
+        normalize_world_space=False,
+        random_bkgd=True,
+        random_points_bg=True,
+        antialiased=True,
+        # scale_reg=0.01,
+        # ssim_lambda=0.4,
+        disable_viewer=True,
+        pose_opt=True,
+        needle_reg=0.1,
+        depth_loss=True,
+        depth_lambda=0.1,
+        normal_loss=True,
+        strategy=DefaultStrategy(
+            verbose=True,
+            absgrad=True,
+            grow_grad2d=0.0008,
+            # grow_scale3d=0.003,
+            # prune_scale3d=0.03
+            # refine_stop_iter=30_000,
+        ),
+    )
 
 def run_2dgs_training(scene_dir, gsplat_2d_dir, gpu_index):
     print("\n=== Training 2DGS ===")
@@ -203,7 +200,7 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     geometry_main(
         str(scene_dir),
         has_refined_mesh=args.refine_mesh,
-        num_samples=500000
+        num_samples=200000
     )
     
     # Step 6: Train Gaussian Splatting

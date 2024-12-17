@@ -44,15 +44,12 @@ def main(input_dir, downsample, downsample_threshold=200):
         return True
 
     keyframes_dir = polycam_dir / "keyframes"
-    corrected_images_dir = keyframes_dir / "corrected_images"
     images_dir = keyframes_dir / "images"
 
-    if corrected_images_dir.is_dir():
-        source_dir = corrected_images_dir
-    elif images_dir.is_dir():
+    if images_dir.is_dir():
         source_dir = images_dir
     else:
-        print(f"Error: Neither 'corrected_images' nor 'images' directory found in {keyframes_dir}")
+        print(f"Error: 'images' directory found in {keyframes_dir}")
         return True
 
     # Calculate expected number of images after downsampling

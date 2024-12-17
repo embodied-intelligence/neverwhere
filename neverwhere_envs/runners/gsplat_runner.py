@@ -30,6 +30,7 @@ from torchmetrics.image import PeakSignalNoiseRatio, StructuralSimilarityIndexMe
 from fused_ssim import fused_ssim
 from torchmetrics.image.lpip import LearnedPerceptualImagePatchSimilarity
 from typing_extensions import Literal, assert_never
+from neverwhere_envs.utils.gs_utils import DefaultStrategy
 from neverwhere_envs.utils.misc import AppearanceOptModule, CameraOptModule, knn, rgb_to_sh, set_random_seed
 from neverwhere_envs.utils.lib_bilagrid import (
     BilateralGrid,
@@ -41,9 +42,10 @@ from neverwhere_envs.utils.lib_bilagrid import (
 from gsplat.compression import PngCompression
 from gsplat.distributed import cli
 from gsplat.rendering import rasterization
-from gsplat.strategy import DefaultStrategy, MCMCStrategy
+from gsplat.strategy import MCMCStrategy
 from gsplat.optimizers import SelectiveAdam
 
+MAX_STEPS = 30_000
 
 @dataclass
 class Config:
@@ -84,16 +86,20 @@ class Config:
     steps_scaler: float = 1.0
 
     # Number of training steps
-    max_steps: int = 30_000
+    max_steps: int = MAX_STEPS
     # Steps to evaluate the model
-    eval_steps: List[int] = field(default_factory=lambda: [7_000, 30_000])
+    eval_steps: List[int] = field(default_factory=lambda: [MAX_STEPS])
     # Steps to save the model
-    save_steps: List[int] = field(default_factory=lambda: [7_000, 30_000])
+    save_steps: List[int] = field(default_factory=lambda: [MAX_STEPS])
 
     # Initialization strategy
     init_type: str = "openmvs"
     # Initial number of GSs. Ignored if using sfm
     init_num_pts: int = 100_000
+    # random points for background, only work for openmvs and colmap
+    random_points_bg: bool = False
+    # Number of random points for background
+    init_num_pts_bg: int = 100_000
     # Initial extent of GSs as a multiple of the camera extent. Ignored if using sfm
     init_extent: float = 3.0
     # Degree of spherical harmonics
@@ -160,6 +166,18 @@ class Config:
     depth_loss: bool = False
     # Weight for depth loss
     depth_lambda: float = 1e-2
+    
+    # Enable normal loss. (experimental)
+    normal_loss: bool = False
+    # Weight for normal loss
+    normal_lambda: float = 1e-2
+    
+    # Weight for needle regularization loss term, if enable, recommend to set to 0.1
+    needle_reg: float = 0.
+    # Maximum allowed ratio between largest and smallest scale components
+    needle_reg_ratio: float = 10.0
+    # Apply needle regularization every N steps
+    needle_reg_steps: int = 10
 
     # Dump information to tensorboard every this steps
     tb_every: int = 100
@@ -187,27 +205,74 @@ class Config:
         else:
             assert_never(strategy)
 
+def check_pts_visibility(trainset: Dataset, pts_xyz: torch.Tensor) -> torch.Tensor:
+    """Check if points are visible from any camera in the training set.
+    
+    Args:
+        trainset: Dataset containing camera parameters
+        pts_xyz: Point coordinates of shape [N, 3]
+        
+    Returns:
+        valid_mask: Boolean mask of shape [N] indicating visible points
+    """
+    device = pts_xyz.device
+    valid_mask = torch.zeros(pts_xyz.shape[0], dtype=torch.bool, device=device)
 
-def create_splats_with_optimizers(
+    # Project points to each camera view
+    for i in range(len(trainset)):
+        data = trainset[i]
+        K = data['K'].to(device)  # [3, 3] 
+        c2w = data['camtoworld'].to(device)  # [4, 4]
+        w2c = torch.linalg.inv(c2w)
+        
+        # Project points
+        cam_pts = (w2c[:3, :3] @ pts_xyz.T + w2c[:3, 3:4]).T  # [N, 3]
+        depth = cam_pts[:, 2]
+        
+        # Project to image coordinates
+        img_pts = (K[:2, :2] @ (cam_pts[:, :2] / depth.unsqueeze(-1)).T).T + K[:2, 2]
+        
+        # Check if points project within image bounds
+        h, w = data['image'].shape[:2]
+        current_valid = (
+            (img_pts[:, 0] >= 0)
+            & (img_pts[:, 0] < w) 
+            & (img_pts[:, 1] >= 0)
+            & (img_pts[:, 1] < h)
+            & (depth > 0)
+        )
+        
+        valid_mask = valid_mask | current_valid
+
+    return valid_mask
+
+def init_gaussians(
     parser: Parser,
-    init_type: str = "openmvs",
-    init_num_pts: int = 100_000,
-    init_extent: float = 3.0,
-    init_opacity: float = 0.1,
-    init_scale: float = 1.0,
-    scene_scale: float = 1.0,
-    sh_degree: int = 3,
-    sparse_grad: bool = False,
-    visible_adam: bool = False,
-    batch_size: int = 1,
-    feature_dim: Optional[int] = None,
-    device: str = "cuda",
-    world_rank: int = 0,
-    world_size: int = 1,
-) -> Tuple[torch.nn.ParameterDict, Dict[str, torch.optim.Optimizer]]:
+    trainset: Dataset,
+    init_type: str,
+    init_num_pts: int,
+    init_num_pts_bg: int,
+    random_points_bg: bool,
+    init_extent: float,
+    scene_scale: float,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """Initialize Gaussian points and colors.
+    
+    Args:
+        parser: Parser object containing scene information
+        init_type: Type of initialization ("openmvs", "sfm", or "random")
+        init_num_pts: Number of initial points for random initialization
+        init_num_pts_bg: Number of background points when using random_points_bg
+        random_points_bg: Whether to add random background points
+        init_extent: Initial extent for random initialization
+        scene_scale: Global scale factor for the scene
+        
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor]: Points and RGB colors
+    """
     if init_type == "openmvs":
         # Load the combined point cloud generated by geometry_processor
-        pcd_path = os.path.join(parser.data_dir, "geometry", "pcd_gsplat_init.ply")
+        pcd_path = os.path.join(parser.data_dir, "geometry", "pcd_openmvs_colored.ply")
         if not os.path.exists(pcd_path):
             raise ValueError(f"OpenMVS point cloud not found at {pcd_path}. Please run geometry processing first.")
         
@@ -215,6 +280,9 @@ def create_splats_with_optimizers(
         points = torch.from_numpy(np.asarray(pcd.points)).float()
         rgbs = torch.from_numpy(np.asarray(pcd.colors)).float()  # Already normalized to [0,1]
 
+
+        # Apply the same transformations that were applied to COLMAP points
+        
         # Apply the same transformations that were applied to COLMAP points
         if parser.normalize:
             points = transform_points(parser.T1, points.numpy())
@@ -229,10 +297,8 @@ def create_splats_with_optimizers(
                     "transform": transform_3x4,
                     "scale": parser.scene_scale
                 }, f, indent=4)
-                
-            raise ValueError("Stop here")
-            
     elif init_type == "sfm":
+        # load the sparse points from colmap
         points = torch.from_numpy(parser.points).float()
         rgbs = torch.from_numpy(parser.points_rgb / 255.0).float()
     elif init_type == "random":
@@ -240,7 +306,75 @@ def create_splats_with_optimizers(
         rgbs = torch.rand((init_num_pts, 3))
     else:
         raise ValueError("Please specify a correct init_type: openmvs, sfm or random")
+    
+    if random_points_bg:
+        assert init_type == "openmvs" or init_type == "colmap", \
+            "random_points_bg is only supported for openmvs and colmap"
+        # Compute scene radius (80th percentile of point norms)
+        point_norms = torch.norm(points, dim=1)
+        scene_radius = torch.quantile(point_norms, 0.8)
+        
+        # Generate random directions
+        theta = torch.rand(init_num_pts_bg) * 2 * torch.pi
+        phi = torch.acos(2 * torch.rand(init_num_pts_bg) - 1)
+        
+        x = torch.sin(phi) * torch.cos(theta)
+        y = torch.sin(phi) * torch.sin(theta)
+        z = torch.cos(phi)
+        directions = torch.stack([x, y, z], dim=1)
+        
+        # Generate random radii between 1.0 and 1.2 times scene_radius
+        radii = (1 + 0.2 * torch.rand(init_num_pts_bg, 1)) * scene_radius
+        
+        points_bg = directions * radii
+        rgbs_bg = torch.rand((init_num_pts_bg, 3))
+        
+        # filter valid points
+        valid_mask = check_pts_visibility(trainset, points_bg)
+        points_bg = points_bg[valid_mask]
+        rgbs_bg = rgbs_bg[valid_mask]
+        
+        print(f"Number of valid points: {len(points_bg)} for background points")
+        print(f"Number of valid points: {len(points)} for foreground points")
+        
+        points = torch.cat([points, points_bg], dim=0)
+        rgbs = torch.cat([rgbs, rgbs_bg], dim=0)
+        print(f"Total number of points: {len(points)}")
+        
+    return points, rgbs
 
+def create_splats_with_optimizers(
+    parser: Parser,
+    trainset: Dataset,
+    init_type: str = "openmvs",
+    init_num_pts: int = 100_000,
+    init_num_pts_bg: int = 100_000,
+    random_points_bg: bool = False,
+    init_extent: float = 3.0,
+    init_opacity: float = 0.1,
+    init_scale: float = 1.0,
+    scene_scale: float = 1.0,
+    sh_degree: int = 3,
+    sparse_grad: bool = False,
+    visible_adam: bool = False,
+    batch_size: int = 1,
+    feature_dim: Optional[int] = None,
+    device: str = "cuda",
+    world_rank: int = 0,
+    world_size: int = 1,
+) -> Tuple[torch.nn.ParameterDict, Dict[str, torch.optim.Optimizer]]:
+    
+    points, rgbs = init_gaussians(
+        parser=parser,
+        trainset=trainset,
+        init_type=init_type,
+        init_num_pts=init_num_pts,
+        init_num_pts_bg=init_num_pts_bg,
+        random_points_bg=random_points_bg,
+        init_extent=init_extent,
+        scene_scale=scene_scale,
+    )
+    
     # Initialize the GS size to be the average dist of the 3 nearest neighbors
     dist2_avg = (knn(points, 4)[:, 1:] ** 2).mean(dim=-1)  # [N,]
     dist_avg = torch.sqrt(dist2_avg)
@@ -341,6 +475,8 @@ class Runner:
             split="train",
             patch_size=cfg.patch_size,
             load_depths=cfg.depth_loss,
+            load_normals=cfg.normal_loss,
+            load_confidences=cfg.depth_loss or cfg.normal_loss,
         )
         self.valset = Dataset(self.parser, split="val")
         self.scene_scale = self.parser.scene_scale * 1.1 * cfg.global_scale
@@ -350,8 +486,11 @@ class Runner:
         feature_dim = 32 if cfg.app_opt else None
         self.splats, self.optimizers = create_splats_with_optimizers(
             self.parser,
+            self.trainset,
             init_type=cfg.init_type,
             init_num_pts=cfg.init_num_pts,
+            init_num_pts_bg=cfg.init_num_pts_bg,
+            random_points_bg=cfg.random_points_bg,
             init_extent=cfg.init_extent,
             init_opacity=cfg.init_opa,
             init_scale=cfg.init_scale,
@@ -605,9 +744,6 @@ class Runner:
             )
             image_ids = data["image_id"].to(device)
             masks = data["mask"].to(device) if "mask" in data else None  # [1, H, W]
-            if cfg.depth_loss:
-                points = data["points"].to(device)  # [1, M, 2]
-                depths_gt = data["depths"].to(device)  # [1, M]
 
             height, width = pixels.shape[1:3]
 
@@ -665,25 +801,25 @@ class Runner:
                 colors.permute(0, 3, 1, 2), pixels.permute(0, 3, 1, 2), padding="valid"
             )
             loss = l1loss * (1.0 - cfg.ssim_lambda) + ssimloss * cfg.ssim_lambda
-            if cfg.depth_loss:
-                # query depths from depth map
-                points = torch.stack(
-                    [
-                        points[:, :, 0] / (width - 1) * 2 - 1,
-                        points[:, :, 1] / (height - 1) * 2 - 1,
-                    ],
-                    dim=-1,
-                )  # normalize to [-1, 1]
-                grid = points.unsqueeze(2)  # [1, M, 1, 2]
-                depths = F.grid_sample(
-                    depths.permute(0, 3, 1, 2), grid, align_corners=True
-                )  # [1, 1, M, 1]
-                depths = depths.squeeze(3).squeeze(1)  # [1, M]
-                # calculate loss in disparity space
-                disp = torch.where(depths > 0.0, 1.0 / depths, torch.zeros_like(depths))
-                disp_gt = 1.0 / depths_gt  # [1, M]
-                depthloss = F.l1_loss(disp, disp_gt) * self.scene_scale
-                loss += depthloss * cfg.depth_lambda
+            # depth loss
+            if cfg.depth_loss and "depths" in data and "confidences" in data:
+                depths_gt = data["depths"].to(device).squeeze()  # [B, H, W]
+                confidences = data["confidences"].to(device).squeeze()  # [B, H, W]
+                depths_pred = depths.squeeze()
+                
+                # Convert depths to disparity space for loss calculation
+                valid_mask = (depths_gt > 0) & (depths_pred > 0)
+                if masks is not None:
+                    valid_mask = valid_mask & masks.squeeze()
+                
+                disp = torch.where(depths_pred > 0, 1.0 / depths_pred, torch.zeros_like(depths_pred))
+                disp_gt = torch.where(depths_gt > 0, 1.0 / depths_gt, torch.zeros_like(depths_pred))
+                
+                # Apply confidence weights to the depth loss
+                depthloss = (torch.abs(disp - disp_gt) * confidences)[valid_mask].mean()
+                depthloss = depthloss * self.scene_scale * cfg.depth_lambda
+                loss += depthloss
+            # bilateral grid
             if cfg.use_bilateral_grid:
                 tvloss = 10 * total_variation_loss(self.bil_grids.grids)
                 loss += tvloss
@@ -700,6 +836,17 @@ class Runner:
                     loss
                     + cfg.scale_reg * torch.abs(torch.exp(self.splats["scales"])).mean()
                 )
+            if cfg.needle_reg > 0.0:
+                if step % cfg.needle_reg_steps == 0:
+                    scale_exp = torch.exp(self.splats["scales"])  # [N, 3]
+                    scale_reg = (
+                        torch.maximum(
+                            scale_exp.amax(dim=-1) / scale_exp.amin(dim=-1),
+                            torch.tensor(cfg.needle_reg_ratio, device=device),
+                        )
+                        - cfg.needle_reg_ratio
+                    )
+                    loss = loss + cfg.needle_reg * scale_reg.mean()
 
             loss.backward()
 
@@ -1041,6 +1188,7 @@ class Runner:
             height=H,
             sh_degree=self.cfg.sh_degree,  # active all SH degrees
             radius_clip=3.0,  # skip GSs that have small image radius (in pixels)
+            # near_plane=0.01,
         )  # [1, H, W, 3]
         return render_colors[0].cpu().numpy()
 
@@ -1063,7 +1211,7 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
     # Check for ckpt_29999 files
     ckpt_dir = os.path.join(result_dir, "ckpts")
     if os.path.exists(ckpt_dir):
-        ckpt_files = sorted([f for f in os.listdir(ckpt_dir) if f.startswith("ckpt_29999_")])
+        ckpt_files = sorted([f for f in os.listdir(ckpt_dir) if f.startswith(f"ckpt_{MAX_STEPS-1}")])
         if ckpt_files:
             ckpt_path = os.path.join(ckpt_dir, ckpt_files[0])
             print(f"Found checkpoint at {ckpt_path}, copying...")
@@ -1109,6 +1257,10 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
     if not cfg.disable_viewer and not cfg.close_viewer_after_training:
         print("Viewer running... Ctrl+C to exit.")
         time.sleep(1000000)
+        
+    # cp the model to the result_dir
+    ckpt_path = os.path.join(result_dir, f"ckpts/ckpt_{MAX_STEPS-1}_rank0.pt")
+    shutil.copy2(ckpt_path, model_ckpt)
 
 
 if __name__ == "__main__":
