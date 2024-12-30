@@ -4,6 +4,7 @@ from gym_dmc.wrappers import FlattenObservation
 
 from neverwhere.tasks import ROOT
 from neverwhere.tasks.base.go1_base import Go1, Physics
+from neverwhere.wrappers.depth_midas_render_wrapper import MidasRenderDepthWrapper
 from neverwhere.wrappers.depth_vision_wrapper import DepthVisionWrapper
 from neverwhere.wrappers.domain_randomization_wrapper import DomainRandomizationWrapper
 from neverwhere.wrappers.history_wrapper import HistoryWrapper
@@ -17,6 +18,7 @@ from neverwhere.wrappers.splat_wrapper import SplatWrapper
 from neverwhere.wrappers.gsplat_wrapper import GSplatWrapper
 from neverwhere.wrappers.terrain_randomization_wrapper import TerrainRandomizationWrapper
 from neverwhere.wrappers.vision_wrapper import TrackingVisionWrapper
+from neverwhere.wrappers.pcd_wrapper import PointCloudWrapper
 
 DEFAULT_TIME_LIMIT = 25
 
@@ -105,6 +107,13 @@ def entrypoint(
         env = TerrainRandomizationWrapper(env, terrain_type=terrain_type, rand_params=terrain_rand_params, random=random)
     
     env = ScandotsWrapper(env, **kwargs, device=device)
+    env = MidasRenderDepthWrapper(
+        env,
+        width=1280,
+        height=720,
+        camera_id="ego-rgb",
+        device=device,
+    )
     fill_masks = False
     if use_cones: # need seg and RGB
         env = SegmentationWrapper(
@@ -149,6 +158,17 @@ def entrypoint(
         )
     else:
         raise ValueError(f"Unknown data version: {scene_version}")
+    
+    env = PointCloudWrapper(
+        env,
+        camera_id="tracking-pcd",
+        width=1280,
+        height=720, 
+        lidar_width=640,
+        lidar_height=360,
+        lidar_camera_ids=["lidar0"],
+        range_threshold=10,
+    )
     # env = TrackingVisionWrapper(
     #     env,
     #     camera_id="ego-rgb",

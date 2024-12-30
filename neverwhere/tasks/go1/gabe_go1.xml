@@ -39,6 +39,7 @@
     <light directional="true" diffuse=".8 .8 .8" pos="0 0 10" dir="0 0 -10"/>
     <body name="trunk" pos="0 0 0.4">
       <camera name="tracking" mode="trackcom" pos="0 -1 1" xyaxes="1 0 0 0 1 1"/>
+      <camera name="tracking-pcd" pos="0.3 0.0 -0.3" xyaxes="0 -1 0 0 0 1" fovy="90"/>
       <camera name="tracking-ground" mode="trackcom" pos="0 -1 -0.3" xyaxes="1 0 0 0 0 1"/>
       <camera name="tracking-2" mode="trackcom" pos="0 -1 0" xyaxes="1 0 0 0 0 1"/>
       <camera name="realsense" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="56.18593669466556"/>
@@ -46,6 +47,10 @@
       <camera name="ego-rgb-render" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="92.69673787219053"/>
 <!--      <camera name="ego-rgb" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="42.61"/>-->
 <!--      <camera name="ego-rgb-render" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="92.69673787219053"/>-->
+      <camera name="lidar0" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="90"/>
+      <camera name="lidar1" pos="0.27 0.0 0.015" xyaxes="-1 0 0 0 0 1" fovy="90"/>
+      <camera name="lidar2" pos="0.27 0.0 0.015" xyaxes="0 1 0 0 0 1" fovy="90"/>
+      <camera name="lidar3" pos="0.27 0.0 0.015" xyaxes="1 0 0 0 0 1" fovy="90"/>
       <camera name="realsense-rgb" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="42.61"/>
       <camera name="realsense-rgb-render" pos="0.27 0.0 0.015" xyaxes="0 -1 0 0 0 1" fovy="45.1729792"/>
       <camera name="heightmap" mode="trackcom" pos="0 0 25" xyaxes="0 -1 0 1 0 0" fovy="6"/>
