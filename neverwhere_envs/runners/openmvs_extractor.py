@@ -105,7 +105,21 @@ def main(scene_dir: str, verbose: bool = False, keys=None):
         print(f"No .dmap files found in {openmvs_dir}")
         return
     
-    print(f"Processing {len(dmap_files)} depth maps...")
+    # Check which keys need processing
+    keys_to_process = []
+    for key in keys:
+        output_dir = output_dirs[key]
+        existing_files = list(output_dir.glob("*.npy"))
+        if len(existing_files) != len(dmap_files):
+            keys_to_process.append(key)
+        else:
+            print(f"Skipping {key} - already processed ({len(dmap_files)} files exist)")
+    
+    if not keys_to_process:
+        print("All data already extracted. Skipping extraction.")
+        return
+        
+    print(f"Processing {len(dmap_files)} depth maps for keys: {keys_to_process}")
     
     for dmap_file in dmap_files:
         try:
@@ -113,7 +127,7 @@ def main(scene_dir: str, verbose: bool = False, keys=None):
             base_name = Path(data['image_filename']).stem
             
             # Process each requested key
-            for key in keys:
+            for key in keys_to_process:
                 map_key = f'{key}_map'
                 if map_key not in data or data[map_key] is None:
                     continue

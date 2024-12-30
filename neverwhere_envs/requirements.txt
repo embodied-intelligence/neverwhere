@@ -1,5 +1,8 @@
 open3d==0.18.0
 opencv-python
+trimesh
+fast-simplification
+transforms3d
 
 vuer[all]
 params-proto
