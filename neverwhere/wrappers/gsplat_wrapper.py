@@ -15,6 +15,10 @@ def load_mesh_info(dataset_root, dataset_prefix):
 
     # extract scale and transform from data_transforms.json
     dataparser_tf_path = f"{dataset_root}/{dataset_prefix}/3dgs/data_transforms.json"
+    if not os.path.exists(dataparser_tf_path):
+        print("the transformation is already aligned, skipped alignment")
+        return 1.0, np.eye(4)
+
     with open(dataparser_tf_path) as f:
         data = json.load(f)
         scale = data["scale"]
