@@ -199,8 +199,8 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     print("\n=== Processing geometry ===")
     geometry_main(
         str(scene_dir),
-        has_refined_mesh=args.refine_mesh,
-        num_samples=200000
+        num_samples=200000,
+        simplify_factor=0.95
     )
     
     # Step 6: Train Gaussian Splatting
