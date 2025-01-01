@@ -8,7 +8,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="real_scenes/{scene_name}/geometry/collision.obj">
+        <mesh name="mesh" file="real_scenes/{scene_name}/geometry/collision_mesh.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>

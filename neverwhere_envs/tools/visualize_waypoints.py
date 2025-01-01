@@ -9,9 +9,12 @@ from vuer.schemas import DefaultScene, TriMesh, Cylinder, group, Movable, InputB
 from pathlib import Path
 
 class Args(ParamsProto):
-    dataset_root = Proto(env="NEVERWHERE_DATASETS")
-    dataset_prefix = "hurdle_black_stone_v1"
-    port = 9036  # Different from get_xml.py to avoid conflicts
+    # dataset root
+    dataset_root = "/SSD_7T/chenziyu/code/nw/neverwhere_envs/all_scans_v1_12292024"
+    # scene name
+    scene_name = "hurdle_three_grassy_courtyard_v2"
+    # viewer port
+    port = 8093
     
 REORDER_AXES = [0, 1, 2]
 
@@ -65,15 +68,11 @@ def main(**deps):
     Args._update(deps)
     
     # Load mesh
-    try:
-        mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision_simplified.obj"
-        mesh = as_mesh(trimesh.load_mesh(mesh_path))
-    except FileNotFoundError:
-        mesh_path = f"{Args.dataset_root}/{Args.dataset_prefix}/geometry/collision.obj"
-        mesh = as_mesh(trimesh.load_mesh(mesh_path))
+    mesh_path = f"{Args.dataset_root}/{Args.scene_name}/geometry/collision_mesh.obj"
+    mesh = as_mesh(trimesh.load_mesh(mesh_path))
     
     # Load XML data
-    xml_path = f"{Args.dataset_root}/{Args.dataset_prefix}/{Path(Args.dataset_prefix).stem}.xml"
+    xml_path = f"{Args.dataset_root}/{Args.scene_name}/{Path(Args.scene_name).stem}.xml"
     print(f"Loading XML from {xml_path}")
     load_from_xml(xml_path)
     
@@ -88,8 +87,6 @@ def main(**deps):
     async def main(session: VuerSession):
         children = []
         for i, waypoint in enumerate(SaveArgs.waypoints):
-            if i > 0:
-                continue
             print(f"Waypoint {i}: {waypoint}")
             children.append(
                 Movable(
@@ -110,19 +107,14 @@ def main(**deps):
         session @ Set(
             DefaultScene(
                 group(
-                    Movable(
-                        TriMesh(
-                            key="trimesh",
-                            vertices=np.array(mesh.vertices),
-                            faces=np.array(mesh.faces),
-                            color="gray",
-                            # wireframe=True,
-                        ),
-                        # anchor=[0, 1, 0],
+                    TriMesh(
+                        key="trimesh",
+                        vertices=np.array(mesh.vertices),
+                        faces=np.array(mesh.faces),
+                        color="gray",
+                        # wireframe=True,
                         position=[SaveArgs.position[i] for i in REORDER_AXES],
                         rotation=[SaveArgs.rotation[i] for i in REORDER_AXES],
-                        scale=3.0,
-                        key="mesh",
                     ),
                 ),
                 *children,
