@@ -159,16 +159,16 @@ def entrypoint(
     else:
         raise ValueError(f"Unknown data version: {scene_version}")
     
-    env = PointCloudWrapper(
-        env,
-        camera_id="tracking-pcd",
-        width=1280,
-        height=720, 
-        lidar_width=640,
-        lidar_height=360,
-        lidar_camera_ids=["lidar0"],
-        range_threshold=10,
-    )
+    # env = PointCloudWrapper(
+    #     env,
+    #     camera_id="tracking-pcd",
+    #     width=1280,
+    #     height=720, 
+    #     lidar_width=640,
+    #     lidar_height=360,
+    #     lidar_camera_ids=["lidar0"],
+    #     range_threshold=10,
+    # )
     # env = TrackingVisionWrapper(
     #     env,
     #     camera_id="ego-rgb",

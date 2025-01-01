@@ -13,7 +13,7 @@ for scene in available_scenes_list:
             check_contact_termination=True,
             mode="heightmap_splat",
             dataset_name=scene,
-            xml_path=f"neverwhere_{scene}.xml",
+            xml_path=f"nw_{scene}.xml",
             n_proprio=53,
             x_noise=0,
             y_noise=0.1,
