@@ -1,21 +1,26 @@
+import os
 import random
+from collections import defaultdict, deque
+from importlib import import_module
+from logging import warning
+from pickle import UnpicklingError
 
 import dm_control
 import numpy as np
 import torch
-from collections import defaultdict, deque
-from importlib import import_module
-from logging import warning
 from matplotlib.cm import get_cmap
+from ml_logger import logger
 from ml_logger.job import RUN
 from params_proto import Flag, ParamsProto, Proto
-from pickle import UnpicklingError
 from tqdm import trange
 
 import neverwhere
+from cxx.modules.parkour_actor import PolicyArgs
+from neverwhere.utils.log import save_video, save_image
 
 JOINT_IDX_MAPPING = [3, 4, 5, 0, 1, 2, 9, 10, 11, 6, 7, 8]
 
+SAVE_TO_LOCAL = False
 
 class Unroll(ParamsProto, prefix="unroll"):
     env_name: str = Proto("lcs:Go1-flat_vision-v1")
@@ -42,8 +47,6 @@ class Unroll(ParamsProto, prefix="unroll"):
 
 
 def main(_deps=None, **deps):
-    from ml_logger import logger
-    from cxx.modules.parkour_actor import PolicyArgs
 
     # fixme: temporary patch
     if _deps is not None:
@@ -105,6 +108,9 @@ def main(_deps=None, **deps):
         env = neverwhere.make_lucidsim(Unroll.env_name, device=Unroll.device, random=Unroll.seed, initial_state=initial_state)
     else:
         env = neverwhere.make(Unroll.env_name, device=Unroll.device, random=Unroll.seed, initial_state=initial_state)
+    
+    if SAVE_TO_LOCAL:
+        os.makedirs(f"./{Unroll.env_name}/debug", exist_ok=True)
 
     module_path = Unroll.model_entrypoint
     module_name, entrypoint = module_path.split(":")
@@ -136,6 +142,7 @@ def main(_deps=None, **deps):
     progress = 0
 
     for i in trange(Unroll.num_steps):
+        frame_id = i
         try:
             # obs, reward, done, info = env.step(action, update_baseline=True)
             obs, reward, done, info = env.step(action_buffer[-1 - Unroll.action_delay])
@@ -171,8 +178,18 @@ def main(_deps=None, **deps):
 
             action = action.cpu().numpy()
             action_buffer.append(action)
-
-        if not Unroll.render:
+        
+        if Unroll.render:
+            render = env.render(camera_id="tracking-2", width=640, height=300)
+            b["renders"].append(render)
+            if SAVE_TO_LOCAL:
+                save_image(render, os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_render.png"))
+                
+            ego_render = env.render(camera_id="ego-rgb", width=640, height=360)
+            b["ego_renders"].append(ego_render)
+            if SAVE_TO_LOCAL:
+                save_image(ego_render, os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_ego_render.png"))
+        else:
             continue
 
         if "heightmap" in info:
@@ -181,6 +198,8 @@ def main(_deps=None, **deps):
             hp /= hp.max() + 0.01
             hp = cmap(hp)
             b["heightmaps"].append(hp)
+            if SAVE_TO_LOCAL:
+                save_image(hp, os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_heightmap.png"))
 
         if "height_samples" in info:
             hp = info["height_samples"]
@@ -188,10 +207,14 @@ def main(_deps=None, **deps):
             hp /= hp.max() + 0.01
             hp = cmap(hp)
             b["height_samples"].append(hp)
+            if SAVE_TO_LOCAL:
+                save_image(hp, os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_height_samples.png"))
 
         if "segmented_img" in info:
             segmentation_viz = info["segmented_img"]
             b["segmentation"].append(segmentation_viz)
+            if SAVE_TO_LOCAL:
+                save_image(segmentation_viz, os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_segmentation.png"))
 
             for i, m in info["masks"].items():
                 b[f"mask_{i}_in"].append(m[0])  # in, for group zero
@@ -200,30 +223,44 @@ def main(_deps=None, **deps):
         if "flow" in info:
             b["flow"].append(info["flow"])
             b["flow_mask"].append(info["flow_mask"])
+            if SAVE_TO_LOCAL:
+                save_image(info["flow"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_flow.png"))
+                save_image(info["flow_mask"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_flow_mask.png"))
 
             if "flow_image" in info:
                 b["flow_viz"].append(info["flow_image"])
+                if SAVE_TO_LOCAL:
+                    save_image(info["flow_image"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_flow_viz.png"))
 
         if "render_rgb" in info:
             b["render_rgb"].append(info["render_rgb"])
+            if SAVE_TO_LOCAL:
+                save_image(info["render_rgb"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_render_rgb.png"))
 
         if "render_depth" in info:
             b["render_depth"].append(info["render_depth"])
+            if SAVE_TO_LOCAL:
+                save_image(info["render_depth"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_render_depth.png"))
 
         if "midas_depth" in info:
             b["midas_depth"].append(info["midas_depth"])
+            if SAVE_TO_LOCAL:
+                save_image(info["midas_depth"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_midas_depth.png"))
 
         if "splat_rgb" in info:
             b["splat_rgb"].append(info["splat_rgb"])
+            if SAVE_TO_LOCAL:
+                save_image(info["splat_rgb"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_splat_rgb.png"))
 
         if "splat_depth" in info:
             b["splat_depth"].append(info["splat_depth"])
-
-        if Unroll.render:
-            render = env.render(camera_id="tracking-2", width=640, height=300)
-            b["renders"].append(render)
-            ego_render = env.render(camera_id="ego-rgb", width=640, height=360)
-            b["ego_renders"].append(ego_render)
+            if SAVE_TO_LOCAL:
+                save_image(info["splat_depth"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_splat_depth.png"))
+                
+        if "pointclouds" in info:
+            b["pointclouds"].append(info["pointclouds"])
+            if SAVE_TO_LOCAL:
+                save_image(info["pointclouds"], os.path.join(f"./{Unroll.env_name}/debug", f"{frame_id:04d}_pointclouds.png"))
 
     for k, frames in b.items():
         if frames[-1].dtype in ["float32", "float64"]:
@@ -233,6 +270,8 @@ def main(_deps=None, **deps):
         fps = 50 * len(frames) // progress
         print(f"saving video to {k}.mp4 at fps=", fps)
         logger.save_video(frames, f"{k}.mp4", fps=fps)
+        if SAVE_TO_LOCAL:
+            save_video(frames, f"./{Unroll.env_name}", f"{k}.mp4", fps=fps)
 
     if Unroll.log_metrics:
         # log performance
@@ -291,13 +330,13 @@ if __name__ == "__main__":
         job_kwargs = {
             'unroll.render': True,
             'unroll.log_metrics': True,
-            'unroll.num_steps': 300,
+            'unroll.num_steps': 400,
             'unroll.vision_key': None,
             'unroll.env_name': env_name,
             'unroll.checkpoint': '/lucid-sim/lucid-sim/baselines/launch_intermediate_ckpts_v3/go1/delay_4/300/checkpoints/model_last.pt',
             'unroll.seed': 0,
             'RUN.job_counter': 1,
-            'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/1105_test_realscenes/{env_name}',
+            'RUN.prefix': f'neverwhere/neverwhere/ziyu_playground/01012025/{env_name}',
             'RUN.job_name': env_name,
             'RUN.scene_version': 'neverwhere'
         }
