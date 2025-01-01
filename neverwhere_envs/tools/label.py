@@ -1,5 +1,6 @@
 from asyncio import sleep
 from xml.dom import minidom
+import os
 import json
 
 import numpy as np
@@ -15,11 +16,11 @@ from neverwhere_envs.utils.transform import compute_alignment_transform
 
 class Args(ParamsProto):
     # dataset root
-    dataset_root = "/SSD_7T/chenziyu/code/nw/neverwhere_envs/all_scans_v1_12292024"
+    dataset_root = os.environ["NEVERWHERE_DATASET_ROOT"]
     # scene name
-    scene_name = "hurdle_three_grassy_courtyard_v2"
+    scene_name = os.environ["NEVERWHERE_SCENE_NAME"]
     # viewer port
-    port = 8093
+    port = 9012
     # text window hint
     text_window_hint = "Please follow the instructions below:\nStep 1: rotate the mesh to the desired orientation\nStep 2: add two markers, type 'm' + enter\nStep 3: scale and crop the mesh, type 'r(scale)' + enter\nStep 4: add waypoints, type 'n' + enter\nStep 5: save the xml, type 's' + enter\n"
     # xml template
@@ -282,9 +283,9 @@ def main(**deps):
 
             if Args.auto_add:
                 task_folder = Path(__file__).parent.parent.parent / "neverwhere" / "tasks"
-                tree.write(f"{task_folder / f'neverwhere_{Path(save_path).name}'}")
+                tree.write(f"{task_folder / f'nw_{Path(save_path).name}'}")
 
-                print(f"Added to dog park task list..{task_folder / f'neverwhere_{Path(save_path).name}'}")
+                print(f"Added to dog park task list..{task_folder / f'nw_{Path(save_path).name}'}")
 
             print(f"saved..{save_path}")
             

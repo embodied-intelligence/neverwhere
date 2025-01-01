@@ -1,6 +1,7 @@
 import numpy as np
 import trimesh
 import xml.etree.ElementTree as ET
+import os
 from asyncio import sleep
 from params_proto import ParamsProto, Proto
 from vuer import Vuer, VuerSession
@@ -10,11 +11,11 @@ from pathlib import Path
 
 class Args(ParamsProto):
     # dataset root
-    dataset_root = "/SSD_7T/chenziyu/code/nw/neverwhere_envs/all_scans_v1_12292024"
+    dataset_root = os.environ["NEVERWHERE_DATASET_ROOT"]
     # scene name
-    scene_name = "hurdle_three_grassy_courtyard_v2"
+    scene_name = os.environ["NEVERWHERE_SCENE_NAME"]
     # viewer port
-    port = 8093
+    port = 9012
     
 REORDER_AXES = [0, 1, 2]
 
