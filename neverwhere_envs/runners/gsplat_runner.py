@@ -13,7 +13,7 @@ import numpy as np
 import torch
 import torch.nn.functional as F
 import tqdm
-import tyro
+import argparse
 import viser
 import yaml
 import open3d as o3d
@@ -1193,7 +1193,7 @@ class Runner:
         return render_colors[0].cpu().numpy()
 
 
-def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
+def main(data_dir: str, result_dir: str, gpu_index: str = "-1", eval: bool = False, **kwargs):
     """
     Run 3D Gaussian Splatting training pipeline
     Args:
@@ -1204,13 +1204,13 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
     """
     # Check for existing model.ckpt
     model_ckpt = os.path.join(result_dir, "model.pt")
-    if os.path.exists(model_ckpt):
+    if os.path.exists(model_ckpt) and not eval:
         print(f"Found existing model checkpoint at {model_ckpt}, skipping...")
         return
     
     # Check for ckpt_29999 files
     ckpt_dir = os.path.join(result_dir, "ckpts")
-    if os.path.exists(ckpt_dir):
+    if os.path.exists(ckpt_dir) and not eval:
         ckpt_files = sorted([f for f in os.listdir(ckpt_dir) if f.startswith(f"ckpt_{MAX_STEPS-1}")])
         if ckpt_files:
             ckpt_path = os.path.join(ckpt_dir, ckpt_files[0])
@@ -1241,8 +1241,7 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
     if cfg.ckpt is not None:
         # Run eval only
         ckpts = [
-            torch.load(file, map_location=runner.device, weights_only=True)
-            for file in cfg.ckpt
+            torch.load(cfg.ckpt, map_location=runner.device, weights_only=True)
         ]
         for k in runner.splats.keys():
             runner.splats[k].data = torch.cat([ckpt["splats"][k] for ckpt in ckpts])
@@ -1265,72 +1264,66 @@ def main(data_dir: str, result_dir: str, gpu_index: str = "-1", **kwargs):
 
 if __name__ == "__main__":
     """
-    Usage:
-
-    ```bash
-    # Single GPU training
-    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results
-
-    # Evaluation from checkpoint
-    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results --ckpt /path/to/checkpoint.pt
-
-    # Specify GPU
-    python gsplat_runner.py default --data_dir /path/to/scene --result_dir /path/to/results --gpu_index 0
-    ```
-    """
-    # Config objects we can choose between.
-    # Each is a tuple of (CLI description, config object).
-    configs = {
-        "default": (
-            "Gaussian splatting training using densification heuristics from the original paper.",
-            Config(
-                strategy=DefaultStrategy(verbose=True),
-                data_dir="",  # Required argument
-                result_dir="",  # Required argument
-            ),
-        ),
-        "mcmc": (
-            "Gaussian splatting training using densification from the paper '3D Gaussian Splatting as Markov Chain Monte Carlo'.",
-            Config(
-                init_opa=0.5,
-                init_scale=0.1,
-                opacity_reg=0.01,
-                scale_reg=0.01,
-                strategy=MCMCStrategy(verbose=True),
-                data_dir="",  # Required argument
-                result_dir="",  # Required argument
-            ),
-        ),
-    }
-    cfg = tyro.extras.overridable_config_cli(configs)
+    This script can be used for both training and evaluation of 3D Gaussian Splatting models.
     
-    # Validate required arguments
-    if not cfg.data_dir:
-        raise ValueError("--data_dir is required")
-    if not cfg.result_dir:
-        raise ValueError("--result_dir is required")
-        
-    cfg.adjust_steps(cfg.steps_scaler)
-
-    # try import extra dependencies
-    if cfg.compression == "png":
-        try:
-            import plas
-            import torchpq
-        except:
-            raise ImportError(
-                "To use PNG compression, you need to install "
-                "torchpq (instruction at https://github.com/DeMoriarty/TorchPQ?tab=readme-ov-file#install) "
-                "and plas (via 'pip install git+https://github.com/fraunhoferhhi/PLAS.git') "
-            )
-
-    # Extract the necessary arguments for main()
-    kwargs = vars(cfg)
-    cli(
-        lambda local_rank, world_rank, world_size, args: main(
-            gpu_index=str(local_rank),  # Use local_rank as GPU index
-            **vars(args)
-        ), 
-        cfg, 
-        verbose=True
+    For training:
+    python gsplat_runner.py --data_dir /path/to/scene --result_dir /path/to/results [options]
+    
+    For evaluation:
+    python gsplat_runner.py --data_dir /path/to/scene --result_dir /path/to/results --ckpt /path/to/model.pt [options]
+    """
+    parser = argparse.ArgumentParser(description="3D Gaussian Splatting Training/Evaluation")
+    
+    # Required arguments
+    parser.add_argument("--data_dir", required=True, help="Path to the scene directory")
+    parser.add_argument("--result_dir", required=True, help="Path where results will be saved")
+    
+    # Optional arguments
+    parser.add_argument("--gpu_index", type=str, default="-1", help="GPU index to use")
+    parser.add_argument("--ckpt", type=str, help="Path to checkpoint for evaluation")
+    
+    # Training specific arguments
+    parser.add_argument("--init_type", type=str, default="openmvs", choices=["openmvs", "sfm", "random"],
+                       help="Type of initialization to use")
+    parser.add_argument("--normalize_world_space", action="store_true", 
+                       help="Whether to normalize world space")
+    parser.add_argument("--random_bkgd", action="store_true",
+                       help="Use random background during training")
+    parser.add_argument("--random_points_bg", action="store_true",
+                       help="Add random background points")
+    parser.add_argument("--antialiased", action="store_true",
+                       help="Enable anti-aliasing")
+    parser.add_argument("--pose_opt", action="store_true",
+                       help="Enable camera pose optimization")
+    parser.add_argument("--needle_reg", type=float, default=0.0,
+                       help="Weight for needle regularization")
+    parser.add_argument("--depth_loss", action="store_true",
+                       help="Enable depth loss")
+    parser.add_argument("--depth_lambda", type=float, default=0.1,
+                       help="Weight for depth loss")
+    parser.add_argument("--normal_loss", action="store_true",
+                       help="Enable normal loss")
+    parser.add_argument("--disable_viewer", action="store_true",
+                       help="Disable viewer during training")
+    
+    # Parse arguments
+    args = parser.parse_args()
+    
+    # Create config
+    strategy = DefaultStrategy(
+        verbose=True,
+        absgrad=True,
+        grow_grad2d=0.0008,
     )
+    
+    # turn on eval if ckpt is provided
+    eval = args.ckpt is not None
+    print(f"Eval: {eval}")
+    
+    # Create config from args
+    cfg_dict = vars(args)
+    cfg_dict['strategy'] = strategy
+    cfg_dict['eval'] = eval
+    
+    # Run main function with the config
+    main(**cfg_dict)
