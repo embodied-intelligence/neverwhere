@@ -23,9 +23,9 @@ class Args(ParamsProto):
     # text window hint
     text_window_hint = "Please follow the instructions below:\nStep 1: rotate the mesh to the desired orientation\nStep 2: add two markers, type 'm' + enter\nStep 3: scale and crop the mesh, type 'r(scale)' + enter\nStep 4: add waypoints, type 'n' + enter\nStep 5: save the xml, type 's' + enter\n"
     # xml template
-    template_path = "neverwhere_envs/tools/templates/mesh.xml"
+    template_path = "neverwhere_envs/tools/templates/mesh_v2.xml"
     # mesh params
-    bounding_box = [-1, -3, -3, 10, 3, 3]
+    bounding_box = [-2, -3, -3, 10, 3, 3]
     friction = 1.25
     # whether to auto add to task list
     auto_add = True
@@ -33,6 +33,7 @@ class Args(ParamsProto):
 class SaveArgs:
     position = [0, 0, 0]
     rotation = [0, 0, 0]
+    scale = None
     waypoints = []
     markers = []
 
@@ -206,7 +207,7 @@ def main(**deps):
             scale = real_length / length
             print(f"Rescaling mesh by {scale} times")
             mesh.apply_scale(scale)
-            
+            SaveArgs.scale = scale
             # Crop the mesh according to the bounding box
             bounding_box = np.array(Args.bounding_box).reshape(2, 3)
             planes = [
@@ -234,22 +235,34 @@ def main(**deps):
             mesh.export(
                 f"{Args.dataset_root}/{Args.scene_name}/geometry/collision_mesh.obj"
             )
-            with open(f"{Args.dataset_root}/{Args.scene_name}/geometry/collision_tf.json", "w") as f:
-                json.dump({
-                    "rotation": SaveArgs.rotation,
-                    "position": SaveArgs.position,
-                    "scale": scale,
-                }, f)
         
         if key == "s":
             save_path = f"{Args.dataset_root}/{Args.scene_name}/{Path(Args.scene_name).stem}.xml"
+            
+            # get transformation with order: transform, rescale
+            tf = np.eye(4)
+            tf[:3, :3] = transforms3d.euler.euler2mat(*SaveArgs.rotation, axes='rxyz')
+            tf[:3, 3] = SaveArgs.position
+            scale_mat = np.diag([SaveArgs.scale, SaveArgs.scale, SaveArgs.scale, 1])
+            tf = np.dot(scale_mat, tf)
+            
+            # T = np.dot(tf, scale_mat_inv)
+            scale_mat_inv = np.diag([1/SaveArgs.scale, 1/SaveArgs.scale, 1/SaveArgs.scale, 1])
+            T = np.dot(tf, scale_mat_inv)
+            
+            # transform T to pos and euler
+            mesh_pos = T[:3, 3]
+            mesh_euler = transforms3d.euler.mat2euler(T[:3, :3], axes='rxyz')
+            mesh_scale = [SaveArgs.scale, SaveArgs.scale, SaveArgs.scale]
+            
             # Use f-string for formatting
             with open(Args.template_path, "r") as file:
                 xml_data = file.read()
             formatted_xml = xml_data.format(
                 scene_name=str(Path(Args.scene_name).stem),
-                mesh_pos="0 0 0", # as the mesh is already transformed
-                mesh_euler="0 0 0", # as the mesh is already transformed
+                mesh_pos=" ".join(map(str, mesh_pos)),
+                mesh_euler=" ".join(map(str, mesh_euler)),
+                mesh_scale=" ".join(map(str, mesh_scale)),
                 friction=str(Args.friction),
             )
 
@@ -274,6 +287,14 @@ def main(**deps):
                 print(f"Added to dog park task list..{task_folder / f'neverwhere_{Path(save_path).name}'}")
 
             print(f"saved..{save_path}")
+            
+            # save the transformation matrix
+            with open(f"{Args.dataset_root}/{Args.scene_name}/geometry/collision_tf.json", "w") as f:
+                json.dump({
+                    "mesh_scale": SaveArgs.scale,
+                    "mesh_pos": mesh_pos.tolist(),
+                    "mesh_euler": list(mesh_euler),
+                }, f)
 
     @app.spawn(start=True)
     async def main(session):
