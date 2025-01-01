@@ -108,17 +108,17 @@ def process_textured_mesh(mesh_path, output_dir, num_samples=100000):
     o3d.io.write_point_cloud(output_path, pcd)
     print(f"Saved sampled point cloud ({num_samples} points) to {output_path}")
 
-def process_collision_geometry(mesh_path, output_dir, simplify_factor=0.95):
+def process_visual_geometry(mesh_path, output_dir, simplify_factor=0.95):
     """Process mesh for collision geometry."""
     # Define output paths
-    base_path = os.path.join(output_dir, 'mesh.obj')
-    base_simplified_path = os.path.join(output_dir, 'mesh_simplified.obj')
+    base_path = os.path.join(output_dir, 'visual_mesh.obj')
+    base_simplified_path = os.path.join(output_dir, 'visual_mesh_simplified.obj')
     
     required_paths = [base_path, base_simplified_path]
     
     # Skip if all files exist
     if all(os.path.exists(p) for p in required_paths):
-        print(f"Skipping collision geometry: all files already exist")
+        print(f"Skipping visual geometry: all files already exist")
         return
     
     # Load original mesh with Open3D
@@ -204,13 +204,13 @@ def main(scene_dir, num_samples=100000, simplify_factor=0.95):
         recon_path = os.path.join(openmvs_dir, 'model_dense_recon.ply')
         refine_path = os.path.join(openmvs_dir, 'model_dense_refine.ply')
         # recon mesh is in higher priority
-        collision_mesh_path = recon_path if os.path.exists(recon_path) else refine_path
+        openmvs_mesh_path = recon_path if os.path.exists(recon_path) else refine_path
         
         if os.path.exists(textured_mesh_path):
             process_textured_mesh(textured_mesh_path, geometry_dir, num_samples=num_samples)
         
-        if os.path.exists(collision_mesh_path):
-            process_collision_geometry(collision_mesh_path, geometry_dir, simplify_factor=simplify_factor)
+        if os.path.exists(openmvs_mesh_path):
+            process_visual_geometry(openmvs_mesh_path, geometry_dir, simplify_factor=simplify_factor)
     
     # NOTE: this is used in previous version
     #       In current version, we use openmvs_dense_colored.ply as the initial point cloud, no sfm points needed
