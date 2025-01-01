@@ -23,6 +23,5 @@ stairs_36_backstairs_v2
 stairs_48_v3
 wood_ramp_aligned_bricks_v1
 wood_ramp_aligned_grass_v2
-wood_ramp_aligned_grass_v2
 wood_ramp_offset_bricks_v2
-wood_ramp_offset_bricks_v2
+wood_ramp_offset_grass_v1
