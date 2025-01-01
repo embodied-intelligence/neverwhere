@@ -84,24 +84,28 @@ class GSplatWrapper(gym.Wrapper):
         self.fx = 0.5 * self.height / np.tan(self.fovy * np.pi / 360)
         self.fy = self.fx
 
-        model_translation = self.unwrapped.env.physics.named.data.xpos["mesh"]
-
-        # row major
-        model_rot = self.unwrapped.env.physics.named.data.xmat["mesh"].reshape(3, 3)
+        mesh_translation = self.unwrapped.env.physics.named.data.xpos["mesh"]
+        mesh_rot = self.unwrapped.env.physics.named.data.xmat["mesh"].reshape(3, 3)
+        mesh_scale = self.unwrapped.env.physics.named.model.mesh_scale["visual_mesh"]
+        
+        # mesh_tf: mesh's transformation matrix
+        # first apply scale, then transform
+        mesh_tf = np.eye(4)
+        scale_mat = np.diag([mesh_scale[0], mesh_scale[1], mesh_scale[2], 1])
+        mesh_tf[:3, :3] = mesh_rot @ scale_mat[:3, :3]
+        mesh_tf[:3, 3] = mesh_translation
 
         # self.scale: dataparser scale
         self.model, self.scale, self.transform = load_model(DATASET_ROOT, dataset_name, device)
-
-        # model_tf: splat to mujoco
-        self.model_tf = np.eye(4)
-        self.model_tf[:3, :3] = model_rot
-        self.model_tf[:3, 3] = model_translation
-
+        
         # transformation has already included the scale
         # scale_mat = np.diag([1 / self.scale, 1 / self.scale, 1 / self.scale, 1])
-
-        # Apply transformation from data_transforms.json
-        self.model_tf = self.model_tf @ np.linalg.inv(self.transform)
+        
+        # splat_tf: splat to mesh
+        splat_tf = self.transform
+        
+        # splat to mujoco
+        self.model_tf = mesh_tf @ np.linalg.inv(splat_tf)
 
     def get_tf_info(self):
         """returns the model transformation information"""
