@@ -4,7 +4,7 @@ import numpy as np
 import os
 import torch
 
-from neverwhere.gsplat.dn_model import Model
+from neverwhere.gsplat.gsplat_model import Model
 from neverwhere.utils.tf_utils import get_camera_extrinsic_matrix
 
 DATASET_ROOT = os.environ.get("NEVERWHERE_EVAL_DATASETS")
@@ -36,7 +36,7 @@ def load_model(dataset_root, dataset_prefix, device):
 
     print("loading model...")
     state_dict = torch.load(f"{dataset_root}/{dataset_prefix}/3dgs/model.pt", map_location=device)
-    model.load_state_dict_gsplat(state_dict, strict=False)
+    model.load_ckpt(state_dict)
     model.eval()
 
     scale, transform = load_mesh_info(dataset_root, dataset_prefix)

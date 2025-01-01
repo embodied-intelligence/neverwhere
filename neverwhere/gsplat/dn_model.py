@@ -1,3 +1,5 @@
+# lucidsim splat model, gsplat version: 0.1.3
+# pip install git+https://github.com/nerfstudio-project/gsplat.git@0.1.3
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -89,55 +91,6 @@ class Model(nn.Module):
             old_shape = param.shape
             new_shape = (newp,) + old_shape[1:]
             self.gauss_params[name] = torch.nn.Parameter(torch.zeros(new_shape, device=self.device))
-        super().load_state_dict(model_state, **kwargs)
-        
-    def load_state_dict_gsplat(self, state_dict, **kwargs):
-        """Load state dict from gsplat training format.
-        
-        The gsplat training format has slightly different parameter names and shapes,
-        so we need to map them to our format.
-        """
-        # Extract splats from state dict if needed
-        if "splats" in state_dict:
-            state_dict = state_dict["splats"]
-            
-        # Map gsplat parameter names to our format and handle shape differences
-        model_state = {}
-        
-        # Handle means (same shape)
-        if "means" in state_dict:
-            model_state["gauss_params.means"] = state_dict["means"]
-            
-        # Handle scales (same shape)
-        if "scales" in state_dict:
-            model_state["gauss_params.scales"] = state_dict["scales"]
-            
-        # Handle quaternions (same shape)
-        if "quats" in state_dict:
-            model_state["gauss_params.quats"] = state_dict["quats"]
-            
-        # Handle opacities (shape: [N,] -> [N,1])
-        if "opacities" in state_dict:
-            opacities = state_dict["opacities"]
-            if len(opacities.shape) == 1:
-                opacities = opacities.unsqueeze(-1)
-            model_state["gauss_params.opacities"] = opacities
-            
-        # Handle SH features
-        if "sh0" in state_dict and "shN" in state_dict:
-            # sh0 is DC term [N,3]
-            model_state["gauss_params.features_dc"] = state_dict["sh0"].squeeze(1)
-            # shN is rest of SH coeffs [N,15,3]
-            model_state["gauss_params.features_rest"] = state_dict["shN"]
-            
-        # Resize parameters to match new number of points
-        newp = model_state["gauss_params.means"].shape[0]
-        for name, param in self.gauss_params.items():
-            old_shape = param.shape
-            new_shape = (newp,) + old_shape[1:]
-            self.gauss_params[name] = torch.nn.Parameter(torch.zeros(new_shape, device=self.device))
-        
-        # Load the mapped state dict
         super().load_state_dict(model_state, **kwargs)
 
     @torch.no_grad()
