@@ -4,7 +4,7 @@ import numpy as np
 import os
 import torch
 
-from neverwhere.gsplat.dn_model import Model
+from neverwhere.gsplat.lucidsim_splat_model import Model
 from neverwhere.utils.tf_utils import get_camera_extrinsic_matrix
 
 DATASET_ROOT = os.environ.get("NEVERWHERE_EVAL_DATASETS")
