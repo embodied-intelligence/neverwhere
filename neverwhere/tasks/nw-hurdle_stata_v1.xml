@@ -8,8 +8,8 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1" />
-        <mesh name="visual_mesh" file="real_scenes/hurdle_black_stone_v1/geometry/visual_mesh_simplified.obj" scale="0.8708640913516076 0.8708640913516076 0.8708640913516076" />
-        <mesh name="collision_mesh" file="real_scenes/hurdle_black_stone_v1/geometry/collision_mesh.obj">
+        <mesh name="visual_mesh" file="real_scenes/hurdle_stata_v1/geometry/visual_mesh_simplified.obj" scale="0.8371551900127944 0.8371551900127944 0.8371551900127944" />
+        <mesh name="collision_mesh" file="real_scenes/hurdle_stata_v1/geometry/collision_mesh.obj">
             <plugin instance="sdf" />
         </mesh>
         <material name="collision_mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 0" />
@@ -46,10 +46,10 @@
                     <plugin instance="sdf" />
                 </geom>
             </body>
-            <body name="mesh" pos="1.915851904482425 0.2222394927296965 1.4975919389560495" euler="2.85715945271592 -0.8689331661292369 -1.7245613438511915">
+            <body name="mesh" pos="2.572880500004977 -0.6083308836840338 0.8013613877152572" euler="-2.286448449878318 -0.05037825080605125 2.878291766203183">
                 <geom type="mesh" name="mesh_geom" mesh="visual_mesh" material="visual_mesh_material" group="2" contype="0" conaffinity="0" friction="0 0 0" />
             </body>
             
         </body>
-    <body name="waypoint-0" mocap="true" pos="1.9389026564867284 0 0.7718260644890973"><geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-1" mocap="true" pos="3.6526431410268523 0 0.07544243490475622"><geom name="cone-1_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-1_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body></worldbody>
+    <body name="waypoint-0" mocap="true" pos="1.2935508569260912 0 0.27679450758466484"><geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-1" mocap="true" pos="2.964182130160978 -0.08722976337290081 0.2767944931983948"><geom name="cone-1_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-1_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-2" mocap="true" pos="4.670680699998425 -0.025252066277521572 0.3161104878592"><geom name="cone-2_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-2_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-3" mocap="true" pos="5.9584624118603235 -0.025252066552639008 0.009706465268376485"><geom name="cone-3_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-3_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body></worldbody>
 </mujoco>

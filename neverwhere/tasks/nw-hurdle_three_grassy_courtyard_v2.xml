@@ -8,8 +8,8 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1" />
-        <mesh name="visual_mesh" file="real_scenes/ramp_aligned_blue_carpet_v4/geometry/visual_mesh_simplified.obj" scale="0.4969254392567912 0.4969254392567912 0.4969254392567912" />
-        <mesh name="collision_mesh" file="real_scenes/ramp_aligned_blue_carpet_v4/geometry/collision_mesh.obj">
+        <mesh name="visual_mesh" file="real_scenes/hurdle_three_grassy_courtyard_v2/geometry/visual_mesh_simplified.obj" scale="0.7736206936507326 0.7736206936507326 0.7736206936507326" />
+        <mesh name="collision_mesh" file="real_scenes/hurdle_three_grassy_courtyard_v2/geometry/collision_mesh.obj">
             <plugin instance="sdf" />
         </mesh>
         <material name="collision_mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 0" />
@@ -46,10 +46,10 @@
                     <plugin instance="sdf" />
                 </geom>
             </body>
-            <body name="mesh" pos="1.5172976156893505 -0.06171692548098412 0.45211761890824614" euler="2.306443656960183 -0.30750321031206446 -2.8591849307446333">
+            <body name="mesh" pos="3.418023807067927 0.13010366435639634 0.8120312881033211" euler="-1.7147166170439168 0.06751510781092906 0.014257482752091637">
                 <geom type="mesh" name="mesh_geom" mesh="visual_mesh" material="visual_mesh_material" group="2" contype="0" conaffinity="0" friction="0 0 0" />
             </body>
             
         </body>
-    <body name="waypoint-0" mocap="true" pos="1.2874092223921483 0.004005182501427201 0.01332408356114649"><geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-1" mocap="true" pos="2.113774643630922 0.017023325201161205 -0.04224916389235496"><geom name="cone-1_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-1_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-2" mocap="true" pos="3.027722776631867 0.017023324966430664 -0.10513579271668456"><geom name="cone-2_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-2_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-3" mocap="true" pos="3.9625550736967767 0.017023324966430664 -0.4275695351441049"><geom name="cone-3_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-3_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body></worldbody>
+    <body name="waypoint-0" mocap="true" pos="1.338879907373289 0.09037624354436749 0.2149713419456033"><geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-1" mocap="true" pos="4.132753454022414 0.09037624299526215 0.23132263591503824"><geom name="cone-1_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-1_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-2" mocap="true" pos="6.735493380629001 0.13113172843852094 0.23175171961691668"><geom name="cone-2_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-2_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body><body name="waypoint-3" mocap="true" pos="8.239982467664447 0.13113172352313995 -0.05713035791310965"><geom name="cone-3_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone" /><geom name="cone-3_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone" /></body></worldbody>
 </mujoco>
