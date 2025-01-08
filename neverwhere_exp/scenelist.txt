@@ -1,0 +1,8 @@
+# task_type, scene_name
+hurdle,hurdle_226_blue_carpet_v3
+hurdle,hurdle_one_blue_carpet_v2
+hurdle,hurdle_stata_v1
+hurlde,real_hurdle_three_grassy_ally_v2
+ramp,ramp_bricks_v2
+ramp,wood_ramp_aligned_grass_v2
+stairs,building_31_stairs_v1

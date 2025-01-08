@@ -1,0 +1,6 @@
+# task_type, scene_name
+gaps,gaps_12in_226_blue_carpet_v2
+gaps,gaps_16in_226_blue_carpet_v2
+gaps,gaps_grassy_courtyard_v2
+gaps,gaps_stata_v1
+ramp,ramp_grass_v3
