@@ -49,7 +49,7 @@ def load_from_xml(xml_path):
     # Look for mesh body inside scene-group-2
     scene_group = worldbody.find(".//body[@name='scene-group-2']")
     if scene_group is not None:
-        mesh_body = scene_group.find(".//body[@name='mesh']")
+        mesh_body = scene_group.find(".//body[@name='collision_mesh']")
         if mesh_body is not None:
             SaveArgs.position = [float(x) for x in mesh_body.get("pos").split()]
             SaveArgs.rotation = [float(x) for x in mesh_body.get("euler").split()]
@@ -114,8 +114,8 @@ def main(**deps):
                         faces=np.array(mesh.faces),
                         color="gray",
                         # wireframe=True,
-                        position=[SaveArgs.position[i] for i in REORDER_AXES],
-                        rotation=[SaveArgs.rotation[i] for i in REORDER_AXES],
+                        position=SaveArgs.position,
+                        rotation=SaveArgs.rotation,
                     ),
                 ),
                 *children,

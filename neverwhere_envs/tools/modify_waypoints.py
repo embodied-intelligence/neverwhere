@@ -29,7 +29,24 @@ class Args(ParamsProto):
     prefix = "nw-"
     
 class SaveArgs:
+    position = [0, 0, 0]
+    rotation = [0, 0, 0]
     waypoints = []
+    
+def load_from_xml(xml_path):
+    """Load mesh and waypoint positions from XML file"""
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+    
+    # Find main mesh position and rotation
+    worldbody = root.find("worldbody")
+    # Look for mesh body inside scene-group-2
+    scene_group = worldbody.find(".//body[@name='scene-group-2']")
+    if scene_group is not None:
+        mesh_body = scene_group.find(".//body[@name='collision_mesh']")
+        if mesh_body is not None:
+            SaveArgs.position = [float(x) for x in mesh_body.get("pos").split()]
+            SaveArgs.rotation = [float(x) for x in mesh_body.get("euler").split()]
 
 def as_mesh(scene_or_mesh):
     """
@@ -96,6 +113,11 @@ def main(**deps):
 
     @app.add_handler("OBJECT_MOVE")
     async def on_move(event: ClientEvent, sess: VuerSession):        
+        if event.key == "mesh":
+            SaveArgs.position = event.value["position"]
+            SaveArgs.rotation = event.value["rotation"][:3]
+            return
+
         key_parts = event.key.split("_")
         if len(key_parts) < 2:
             return
@@ -152,6 +174,30 @@ def main(**deps):
 
             # Add new waypoints
             add_waypoint_bodies(root)
+            
+            # modify collision_mesh's pos and eluer according to args.position and rotation
+            if worldbody is not None:
+                scene_group = worldbody.find(".//body[@name='scene-group-2']")
+                if scene_group is not None:
+                    mesh_body = scene_group.find(".//body[@name='collision_mesh']")
+                    if mesh_body is not None:
+                        mesh_body.set("pos", " ".join(map(str, SaveArgs.position)))
+                        mesh_body.set("euler", " ".join(map(str, SaveArgs.rotation)))
+                        
+            # add this offset to mesh
+            if worldbody is not None:
+                scene_group = worldbody.find(".//body[@name='scene-group-2']")
+                if scene_group is not None:
+                    mesh_body = scene_group.find(".//body[@name='mesh']")
+                    # get current pos
+                    current_pos = mesh_body.get("pos").split()
+                    current_rot = mesh_body.get("euler").split()
+                    # add offset
+                    new_pos = [float(x) + float(y) for x, y in zip(current_pos, SaveArgs.position)]
+                    new_rot = [float(x) + float(y) for x, y in zip(current_rot, SaveArgs.rotation)]
+                    if mesh_body is not None:
+                        mesh_body.set("pos", " ".join(map(str, new_pos)))
+                        mesh_body.set("euler", " ".join(map(str, new_rot)))
 
             # Write the updated XML back to the file
             tree.write(save_path, encoding="unicode", xml_declaration=True)
@@ -169,12 +215,18 @@ def main(**deps):
         children = []
         session @ Set(
             DefaultScene(
-                TriMesh(
-                    key="trimesh",
-                    vertices=np.array(mesh.vertices),
-                    faces=np.array(mesh.faces),
-                    color="gray",
-                    # wireframe=True,
+                Movable(
+                    TriMesh(
+                        key="trimesh",
+                        vertices=np.array(mesh.vertices),
+                        faces=np.array(mesh.faces),
+                        color="gray",
+                        # wireframe=True,
+                    ),
+                    position=SaveArgs.position,
+                    rotation=SaveArgs.rotation,
+                    scale=3.0,
+                    key="mesh",
                 ),
                 *children,
                 backgroundChildren=[],
