@@ -146,6 +146,14 @@ def main(_deps=None, **deps):
         try:
             # obs, reward, done, info = env.step(action, update_baseline=True)
             obs, reward, done, info = env.step(action_buffer[-1 - Unroll.action_delay])
+            
+            # check if goal is reached
+            episodic_metrics = env.unwrapped.env.task.get_metrics()
+            frac_goals_reached = episodic_metrics['frac_goals_reached']
+            if frac_goals_reached == 1.0:
+                done = True
+                print("Goal reached, ending this trial.")
+            
             if done:
                 print("Env reset, ending this trial.")
                 break
