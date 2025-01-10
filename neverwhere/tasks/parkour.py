@@ -48,11 +48,21 @@ def entrypoint(
     move_speed_range=[0.8, 0.8],
     # for vision
     stack_size=1,
+    robot="go1",
     check_contact_termination=False,
     scene_version="neverwhere",
     **kwargs,
 ):
     """Returns the Walk task."""
+    
+    if robot == "go1":
+        from neverwhere.tasks.base.go1_base import Go1 as RobotModel
+        from neverwhere.tasks.base.go1_base import Physics
+    elif robot == "go2":
+        from neverwhere.tasks.base.go2_base import Go2 as RobotModel
+        from neverwhere.tasks.base.go2_base import Physics
+    else:
+        raise ValueError(f"Unknown robot: {robot}")
     
     # legacy support
     if "mode" in kwargs:
@@ -69,7 +79,7 @@ def entrypoint(
             if geom_name.startswith("cone"):
                 named_model.geom_rgba[geom_name] = [0, 0, 0, 0]
 
-    task = Go1(vision=True, move_speed_range=move_speed_range, y_noise=y_noise, x_noise=x_noise, random=random, **kwargs)
+    task = RobotModel(vision=True, move_speed_range=move_speed_range, y_noise=y_noise, x_noise=x_noise, random=random, **kwargs)
     env = control.Environment(
         physics,
         task,
