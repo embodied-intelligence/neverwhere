@@ -57,15 +57,26 @@ def entrypoint(
     **kwargs,
 ):
     """Returns the Walk task."""
-    
-    if robot == "go1":
-        from neverwhere.tasks.base.go1_base import Go1 as RobotModel
-        from neverwhere.tasks.base.go1_base import Physics
-    elif robot == "go2":
-        from neverwhere.tasks.base.go2_base import Go2 as RobotModel
-        from neverwhere.tasks.base.go2_base import Physics
-    else:
-        raise ValueError(f"Unknown robot: {robot}")
+     
+    try:
+        # NOTE(ziyu): fix for jaynes in lucidsim training, can be deleted
+        if robot == "go1":
+            from lucidsim.tasks.base.go1_base import Go1 as RobotModel
+            from lucidsim.tasks.base.go1_base import Physics
+        elif robot == "go2":
+            from lucidsim.tasks.base.go2_base import Go2 as RobotModel
+            from lucidsim.tasks.base.go2_base import Physics
+        else:
+            raise ValueError(f"Unknown robot: {robot}")
+    except:
+        if robot == "go1":
+            from neverwhere.tasks.base.go1_base import Go1 as RobotModel
+            from neverwhere.tasks.base.go1_base import Physics
+        elif robot == "go2":
+            from neverwhere.tasks.base.go2_base import Go2 as RobotModel
+            from neverwhere.tasks.base.go2_base import Physics
+        else:
+            raise ValueError(f"Unknown robot: {robot}")
     
     # legacy support
     if "mode" in kwargs:

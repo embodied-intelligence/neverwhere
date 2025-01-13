@@ -130,6 +130,46 @@ add_env(
 )
 
 add_env(
+    env_id=f"Neverwhere-go1-splat_rgb_act-gaps_stata_v1-cones",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="splat_rgb_act",
+        dataset_name="gaps_stata_v1",
+        xml_path=f"{prefix}-go1-gaps_stata_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.3, # y limit: 0.5
+        spawn_x_rand=SPAWN_X_RAND,
+        spawn_y_rand=SPAWN_Y_RAND,
+        spawn_yaw_rand=SPAWN_YAW_RAND,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        robot="go1",
+    ),
+)
+
+add_env(
+    env_id=f"Neverwhere-go1-vision_depth_act-gaps_stata_v1-cones",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_depth_act",
+        dataset_name="gaps_stata_v1",
+        xml_path=f"{prefix}-go1-gaps_stata_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.3, # y limit: 0.5
+        spawn_x_rand=SPAWN_X_RAND,
+        spawn_y_rand=SPAWN_Y_RAND,
+        spawn_yaw_rand=SPAWN_YAW_RAND,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        robot="go1",
+    ),
+)
+
+add_env(
     env_id=f"Neverwhere-go1-heightmap-hurdle_226_blue_carpet_v3-cones",
     entrypoint=entrypoint,
     kwargs=dict(
@@ -615,6 +655,46 @@ add_env(
     kwargs=dict(
         check_contact_termination=True,
         mode="heightmap_splat",
+        dataset_name="gaps_stata_v1",
+        xml_path=f"{prefix}-go2-gaps_stata_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.3, # y limit: 0.5
+        spawn_x_rand=SPAWN_X_RAND,
+        spawn_y_rand=SPAWN_Y_RAND,
+        spawn_yaw_rand=SPAWN_YAW_RAND,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        robot="go2",
+    ),
+)
+
+add_env(
+    env_id=f"Neverwhere-go2-splat_rgb_act-gaps_stata_v1-cones",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="splat_rgb_act",
+        dataset_name="gaps_stata_v1",
+        xml_path=f"{prefix}-go2-gaps_stata_v1.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.3, # y limit: 0.5
+        spawn_x_rand=SPAWN_X_RAND,
+        spawn_y_rand=SPAWN_Y_RAND,
+        spawn_yaw_rand=SPAWN_YAW_RAND,
+        splat_render_keys=["rgb"],
+        use_cones=True,
+        robot="go2",
+    ),
+)
+
+add_env(
+    env_id=f"Neverwhere-go2-vision_depth_act-gaps_stata_v1-cones",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="vision_depth_act",
         dataset_name="gaps_stata_v1",
         xml_path=f"{prefix}-go2-gaps_stata_v1.xml",
         n_proprio=53,
