@@ -3,7 +3,6 @@ from dm_control.rl import control
 from gym_dmc.wrappers import FlattenObservation
 
 from neverwhere.tasks import ROOT
-from neverwhere.tasks.base.go1_base import Go1, Physics
 from neverwhere.wrappers.depth_midas_render_wrapper import MidasRenderDepthWrapper
 from neverwhere.wrappers.depth_vision_wrapper import DepthVisionWrapper
 from neverwhere.wrappers.domain_randomization_wrapper import DomainRandomizationWrapper
