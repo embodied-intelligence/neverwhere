@@ -1,6 +1,7 @@
 # neverwhere splat model, gsplat version: 1.4.0
 # please use the modified version of gsplat
 # pip install git+https://github.com/ziyc/gsplat.git@ziyu/dev
+import os
 import numpy as np
 import torch
 from torch import Tensor, nn
@@ -9,9 +10,14 @@ from typing import Dict, List, Literal, Union, Optional, Tuple
 from gsplat.rendering import rasterization
 from neverwhere_envs.utils.gs_utils import DefaultStrategy
 
+white_bg = [1.0, 1.0, 1.0]
+black_bg = [0.0, 0.0, 0.0]
+
+BG_COLOR = os.environ.get("SPLAT_BG_COLOR", "white")
+
 class RenderCfg:
     # Background color
-    background_color = [1, 1, 1]
+    background_color = white_bg if BG_COLOR == "white" else black_bg
     # SH degree
     sh_degree = 3
     # Rasterization mode
@@ -129,7 +135,7 @@ class Model(nn.Module):
             scale_mat = torch.diag(scale_mat)
             c2w = scale_mat @ c2w
 
-        background = torch.tensor(RenderCfg.background_color, device=self.device, dtype=torch.float32)
+        background = torch.tensor(RenderCfg.background_color, device=self.device, dtype=torch.float32).unsqueeze(0)
         
         # get camera matrices
         K = torch.tensor([[fx, 0, cx], [0, fy, cy], [0, 0, 1]], device=self.device, dtype=torch.float32).reshape(3,3)
@@ -149,6 +155,7 @@ class Model(nn.Module):
             near_plane=RenderCfg.near_plane,
             far_plane=RenderCfg.far_plane,
             render_mode=RenderCfg.render_mode,
+            backgrounds=background
         )
         colors, depths = renders[..., 0:3], renders[..., 3:4]
 
