@@ -1,10 +1,12 @@
 import os
 from dm_control.rl import control
 from gym_dmc.wrappers import FlattenObservation
+from typing import Literal
 
 from neverwhere.tasks import ROOT
 from neverwhere.wrappers.depth_midas_render_wrapper import MidasRenderDepthWrapper
 from neverwhere.wrappers.depth_vision_wrapper import DepthVisionWrapper
+from neverwhere.wrappers.act_observation_wrapper import ACTObservationWrapper
 from neverwhere.wrappers.domain_randomization_wrapper import DomainRandomizationWrapper
 from neverwhere.wrappers.history_wrapper import HistoryWrapper
 from neverwhere.wrappers.lucid_env import LucidEnv
@@ -37,6 +39,7 @@ def entrypoint(
     # waypoint randomization
     y_noise,
     x_noise,
+    mode: Literal["vision_depth_act", "vision", "depth", "segmentation", "heightmap_splat"],
     # whether to add cones as visible geoms at waypoints
     use_cones=False,
     time_limit=DEFAULT_TIME_LIMIT,
@@ -47,6 +50,7 @@ def entrypoint(
     move_speed_range=[0.8, 0.8],
     # for vision
     stack_size=1,
+    img_memory_length=1,
     robot="go1",
     check_contact_termination=False,
     scene_version="neverwhere",
@@ -115,48 +119,44 @@ def entrypoint(
         terrain_type = terrain_rand_params.pop("terrain_type")
         env = TerrainRandomizationWrapper(env, terrain_type=terrain_type, rand_params=terrain_rand_params, random=random)
     
-    env = ScandotsWrapper(env, **kwargs, device=device)
-    env = MidasRenderDepthWrapper(
-        env,
-        width=1280,
-        height=720,
-        camera_id="ego-rgb",
-        device=device,
-    )
-    fill_masks = False
-    if use_cones: # need seg and RGB
-        env = SegmentationWrapper(
-            env,
-            width=1280,
-            height=720,
-            camera_id="ego-rgb",
-            groups=[["soccer*", "basketball*", "ball*", "cone*"]],
-            **kwargs,
-        )
-        env = RenderRGBWrapper(
-            env,
-            camera_id="ego-rgb",
-            width=1280,
-            height=720,
-            **kwargs,
-        )
-        fill_masks = True
-    
     # NOTE(ziyu): in lucidsim, the 3dgs model is trained with nerfstudio's splatfacto
     # now we use gsplat's trainer, so we need to load the model in a different way
     # TODO(ziyu): in the future, we should unify the two ways of loading the model
-    if scene_version == "lucidsim":
-        env = SplatWrapper(
+    if scene_version == "neverwhere":
+        GS_wrapper = GSplatWrapper
+    elif scene_version == "lucidsim":
+        GS_wrapper = SplatWrapper
+    else:
+        raise ValueError(f"Unknown data version: {scene_version}")
+    
+    if mode == "heightmap_splat":
+        env = ScandotsWrapper(env, **kwargs, device=device)
+        env = MidasRenderDepthWrapper(
             env,
-            camera_id="ego-rgb",
             width=1280,
             height=720,
+            camera_id="ego-rgb",
             device=device,
-            fill_masks=fill_masks,
-            **kwargs,
         )
-    elif scene_version == "neverwhere":
-        env = GSplatWrapper(
+        fill_masks = False
+        if use_cones: # need seg and RGB
+            env = SegmentationWrapper(
+                env,
+                width=1280,
+                height=720,
+                camera_id="ego-rgb",
+                groups=[["soccer*", "basketball*", "ball*", "cone*"]],
+                **kwargs,
+            )
+            env = RenderRGBWrapper(
+                env,
+                camera_id="ego-rgb",
+                width=1280,
+                height=720,
+                **kwargs,
+            )
+            fill_masks = True
+        env = GS_wrapper(
             env,
             camera_id="ego-rgb",
             width=1280,
@@ -165,28 +165,102 @@ def entrypoint(
             fill_masks=fill_masks,
             **kwargs,
         )
-    else:
-        raise ValueError(f"Unknown data version: {scene_version}")
-    
-    # env = PointCloudWrapper(
-    #     env,
-    #     camera_id="tracking-pcd",
-    #     width=1280,
-    #     height=720, 
-    #     lidar_width=640,
-    #     lidar_height=360,
-    #     lidar_camera_ids=["lidar0"],
-    #     range_threshold=10,
-    # )
-    # env = TrackingVisionWrapper(
-    #     env,
-    #     camera_id="ego-rgb",
-    #     render_type="splat_rgb",
-    #     stack_size=stack_size,
-    #     width=80,
-    #     height=45,
-    #     device=device,
-    #     **kwargs,
-    # )
+        # env = PointCloudWrapper(
+        #     env,
+        #     camera_id="tracking-pcd",
+        #     width=1280,
+        #     height=720, 
+        #     lidar_width=640,
+        #     lidar_height=360,
+        #     lidar_camera_ids=["lidar0"],
+        #     range_threshold=10,
+        # )
+        # env = TrackingVisionWrapper(
+        #     env,
+        #     camera_id="ego-rgb",
+        #     render_type="splat_rgb",
+        #     stack_size=stack_size,
+        #     width=80,
+        #     height=45,
+        #     device=device,
+        #     **kwargs,
+        # )
+    elif mode == "vision_depth_act":
+        # needed to keep track of the expert observations
+        env = ScandotsWrapper(
+            env,
+            device=device,
+        )
+        env = TrackingVisionWrapper(
+            env,
+            device=device,
+            stack_size=stack_size,
+            **kwargs,
+        )
+        # for render depth
+        env = RenderDepthWrapper(
+            env,
+            width=1280,
+            height=720,
+            camera_id="ego-rgb",
+        )
+        env = ACTObservationWrapper(
+            env,
+            image_key="render_depth",
+            img_memory_length = img_memory_length,
+            **kwargs,
+        )
+    elif mode == "splat_rgb_act":
+        # needed to keep track of the expert observations
+        env = ScandotsWrapper(
+            env,
+            device=device,
+        )
+        env = TrackingVisionWrapper(
+            env,
+            device=device,
+            stack_size=stack_size,
+            **kwargs,
+        )
+        # for render depth
+        env = RenderDepthWrapper(
+            env,
+            width=1280,
+            height=720,
+            camera_id="ego-rgb",
+        )
+        env = ACTObservationWrapper(
+            env,
+            image_key="render_depth",
+            img_memory_length = img_memory_length,
+            **kwargs,
+        )
+        fill_masks = False
+        if use_cones: # need seg and RGB
+            env = SegmentationWrapper(
+                env,
+                width=1280,
+                height=720,
+                camera_id="ego-rgb",
+                groups=[["soccer*", "basketball*", "ball*", "cone*"]],
+                **kwargs,
+            )
+            env = RenderRGBWrapper(
+                env,
+                camera_id="ego-rgb",
+                width=1280,
+                height=720,
+                **kwargs,
+            )
+            fill_masks = True
+        env = GS_wrapper(
+            env,
+            camera_id="ego-rgb",
+            width=1280,
+            height=720, 
+            device=device,
+            fill_masks=fill_masks,
+            **kwargs,
+        )
 
     return env
