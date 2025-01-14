@@ -8,22 +8,24 @@ def bash_run(cmd):
 
     subprocess.check_call(['/bin/bash', '-c', cmd])
 
-def run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False):
+def run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False, single_camera=True):
     print('Running sift matching...')
 
     if remove_exist and os.path.exists(db_file):
         os.remove(db_file) # otherwise colmap will skip sift matching
+    
+    print(f"single_camera: {single_camera}")
 
     # feature extraction
     # if there's no attached display, cannot use feature extractor with GPU
     cmd = ' feature_extractor \
             --database_path {} \
             --image_path {} \
-            --ImageReader.single_camera 1 \
+            --ImageReader.single_camera {} \
             --ImageReader.camera_model SIMPLE_RADIAL \
             --SiftExtraction.estimate_affine_shape 0 \
             --SiftExtraction.use_gpu 1 \
-            --SiftExtraction.gpu_index {}'.format(db_file, img_dir, gpu_index)
+            --SiftExtraction.gpu_index {}'.format(db_file, img_dir, int(single_camera), gpu_index)
     bash_run(cmd)
 
     # feature matching
@@ -35,21 +37,23 @@ def run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False
 
     bash_run(cmd)
     
-def run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=False):
+def run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=False, single_camera=True):
     print('Running sift matching with exhaustive matcher...')
 
     if remove_exist and os.path.exists(db_file):
         os.remove(db_file) # otherwise colmap will skip sift matching
+        
+    print(f"single_camera: {single_camera}")
 
     # feature extraction
     cmd = ' feature_extractor \
             --database_path {} \
             --image_path {} \
-            --ImageReader.single_camera 1 \
+            --ImageReader.single_camera {} \
             --ImageReader.camera_model SIMPLE_RADIAL \
             --SiftExtraction.estimate_affine_shape 0 \
             --SiftExtraction.use_gpu 1 \
-            --SiftExtraction.gpu_index {}'.format(db_file, img_dir, gpu_index)
+            --SiftExtraction.gpu_index {}'.format(db_file, img_dir, int(single_camera), gpu_index)
     bash_run(cmd)
 
     # feature matching
@@ -114,7 +118,7 @@ def check_matching_results(log_dir, img_dir):
     
     return (valid_images / total_images) * 100 if total_images > 0 else 0.0
 
-def main(img_dir, output_dir, gpu_index='-1'):
+def main(img_dir, output_dir, gpu_index='-1', single_camera=True):
     """Run COLMAP SfM pipeline with fallback to vocab_tree if sequential fails"""
     print('Running COLMAP pipeline...')
     
@@ -138,7 +142,7 @@ def main(img_dir, output_dir, gpu_index='-1'):
 
     # Try sequential matching first
     print("\nAttempting sequential matching...")
-    run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False)
+    run_sift_matching_sequential(img_dir, db_file, gpu_index, remove_exist=False, single_camera=single_camera)
     run_sfm(img_dir, db_file, sparse_dir)
     run_model_converter(sparse_dir + '/0', sparse_dir)
     valid_percentage = check_matching_results(sparse_dir, img_dir)
@@ -155,7 +159,7 @@ def main(img_dir, output_dir, gpu_index='-1'):
             os.remove(db_file)
         
         # Try exhaustive matching
-        run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=True)
+        run_sift_matching_exhaustive(img_dir, db_file, gpu_index, remove_exist=True, single_camera=single_camera)
         run_sfm(img_dir, db_file, sparse_dir)
         run_model_converter(sparse_dir + '/0', sparse_dir)
         valid_percentage = check_matching_results(sparse_dir, img_dir)
@@ -184,13 +188,15 @@ if __name__ == '__main__':
                       help='Directory for COLMAP output files')
     parser.add_argument('--gpu-index', type=str, default='-1',
                       help='GPU index to use for SIFT extraction and matching')
-    
+    parser.add_argument('--multi-camera', type=bool, default=False,
+                      help='images are from multiple cameras')
     args = parser.parse_args()
     
     # Run the COLMAP pipeline
     main(
         img_dir=args.img_dir,
         output_dir=args.output_dir,
-        gpu_index=args.gpu_index
+        gpu_index=args.gpu_index,
+        single_camera=not args.multi_camera
     )
 

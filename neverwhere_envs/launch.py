@@ -71,8 +71,10 @@ def main():
     parser.add_argument("--depth-keys", nargs='+', default=['depth', 'confidence'],
                       choices=['depth', 'confidence', 'normal', 'views'],
                       help='Types of depth data to process (default: depth confidence)')
-    #  openmvs
+    # openmvs
     parser.add_argument("--refine-mesh", action="store_true", help="Refine mesh using OpenMVS")
+    # colmap
+    parser.add_argument("--multi-camera", action="store_true", help="images are from multiple cameras")
     args = parser.parse_args()
 
     dataset_path = Path(args.dataset_dir)
@@ -164,7 +166,8 @@ def process_scene(scene_name: str, dataset_dir: Path, args):
     colmap_success = colmap_main(
         img_dir=str(images_dir),
         output_dir=str(colmap_path),
-        gpu_index=args.gpu_index
+        gpu_index=args.gpu_index,
+        single_camera=not args.multi_camera
     )
             
     if not colmap_success:
