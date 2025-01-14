@@ -807,6 +807,20 @@ class Runner:
                 confidences = data["confidences"].to(device).squeeze()  # [B, H, W]
                 depths_pred = depths.squeeze()
                 
+                # Check if depths_gt needs to be upsampled
+                if depths_gt.shape != depths_pred.shape:
+                    # Assuming depths_gt is 2x downsampled, upsample to match depths_pred
+                    depths_gt = F.interpolate(
+                        depths_gt.unsqueeze(0).unsqueeze(0),
+                        size=depths_pred.shape[-2:],
+                        mode='nearest'
+                    ).squeeze(0).squeeze(0)
+                    confidences = F.interpolate(
+                        confidences.unsqueeze(0).unsqueeze(0),
+                        size=depths_pred.shape[-2:],
+                        mode='nearest'
+                    ).squeeze(0).squeeze(0)
+                
                 # Convert depths to disparity space for loss calculation
                 valid_mask = (depths_gt > 0) & (depths_pred > 0)
                 if masks is not None:
