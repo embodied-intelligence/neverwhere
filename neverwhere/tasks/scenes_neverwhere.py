@@ -163,6 +163,28 @@ for robot in robot_list:
 for robot in robot_list:
     for mode in mode_list:
         add_env(
+            env_id=f"Neverwhere-{robot}-{mode}-hurdle_226_blue_carpet_v3_small_noise-cones",
+            entrypoint=entrypoint,
+            kwargs=dict(
+                check_contact_termination=True,
+                mode=mode,
+                dataset_name="hurdle_226_blue_carpet_v3",
+                xml_path=f"{prefix}-{robot}-hurdle_226_blue_carpet_v3.xml",
+                n_proprio=53,
+                x_noise=0,
+                y_noise=0.1, # y limit: 0.4
+                spawn_x_rand=SPAWN_X_RAND,
+                spawn_y_rand=SPAWN_Y_RAND,
+                spawn_yaw_rand=SPAWN_YAW_RAND,
+                splat_render_keys=["rgb"],
+                use_cones=True,
+                robot=robot,
+            ),
+        )
+
+for robot in robot_list:
+    for mode in mode_list:
+        add_env(
             env_id=f"Neverwhere-{robot}-{mode}-hurdle_black_stone_v1-cones",
             entrypoint=entrypoint,
             kwargs=dict(
