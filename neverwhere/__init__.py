@@ -60,7 +60,6 @@ def make(env_id: str, **kwargs):
     entry_point = env_spec["entry_point"]
     _kwargs = env_spec.get("kwargs", {})
     _kwargs.update(kwargs)
-    _kwargs["scene_version"] = "neverwhere"
 
     env = entry_point(**_kwargs)
 

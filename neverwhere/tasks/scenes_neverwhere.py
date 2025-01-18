@@ -9,13 +9,14 @@ SPAWN_Y_RAND = 0.1
 SPAWN_YAW_RAND = 0.1
 
 entrypoint = instr(entrypoint, stack_size=7) # set stack size to 7 as default
+lucidsim_entrypoint = instr(entrypoint, scene_version="lucidsim", stack_size=7)
 
 robot_list = ["go1", "go2"]
 mode_list = ["vision_depth_act", "heightmap_splat", "splat_rgb_act"]
 
 add_env(
     env_id="Real-vision_rgb_act_10-gaps_grassy_courtyard_v2",
-    entrypoint=entrypoint,
+    entrypoint=lucidsim_entrypoint,
     kwargs=dict(
         check_contact_termination=True,
         mode="splat_rgb_act",
@@ -35,7 +36,7 @@ add_env(
 
 add_env(
     env_id="Real-vision_rgb_act_10-hurdle_226_blue_carpet_v3",
-    entrypoint=entrypoint,
+    entrypoint=lucidsim_entrypoint,
     kwargs=dict(
         check_contact_termination=True,
         mode="splat_rgb_act",
