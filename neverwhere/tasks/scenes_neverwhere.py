@@ -28,6 +28,7 @@ add_env(
         spawn_y_rand=0.1,
         spawn_yaw_rand=0.1,
         splat_render_keys=["rgb"],
+        scene_version="lucidsim",
         use_cones=False,
     ),
 )
@@ -45,6 +46,7 @@ add_env(
         y_noise=0.1,
         img_memory_length=10,
         splat_render_keys=["rgb"],
+        scene_version="lucidsim",
         use_cones=False,
     ),
 )
