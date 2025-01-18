@@ -13,6 +13,42 @@ entrypoint = instr(entrypoint, stack_size=7) # set stack size to 7 as default
 robot_list = ["go1", "go2"]
 mode_list = ["vision_depth_act", "heightmap_splat", "splat_rgb_act"]
 
+add_env(
+    env_id="Real-vision_rgb_act_10-gaps_grassy_courtyard_v2",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="splat_rgb_act",
+        dataset_name="gaps_grassy_courtyard_v2",
+        xml_path="gaps_grassy_courtyard_v2.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        spawn_x_rand=0.1,
+        spawn_y_rand=0.1,
+        spawn_yaw_rand=0.1,
+        splat_render_keys=["rgb"],
+        use_cones=False,
+    ),
+)
+
+add_env(
+    env_id="Real-vision_rgb_act_10-hurdle_226_blue_carpet_v3",
+    entrypoint=entrypoint,
+    kwargs=dict(
+        check_contact_termination=True,
+        mode="splat_rgb_act",
+        dataset_name="hurdle_226_blue_carpet_v3",
+        xml_path="hurdle_226_blue_carpet_v3.xml",
+        n_proprio=53,
+        x_noise=0,
+        y_noise=0.1,
+        img_memory_length=10,
+        splat_render_keys=["rgb"],
+        use_cones=False,
+    ),
+)
+
 for robot in robot_list:
     add_env(
         env_id=f"nw-{robot}-gaps_many-vision_depth_act-v1",

@@ -15,8 +15,6 @@ from neverwhere.wrappers.render_rgb_wrapper import RenderRGBWrapper
 from neverwhere.wrappers.reset_wrapper import ResetWrapper
 from neverwhere.wrappers.scandots_wrapper import ScandotsWrapper
 from neverwhere.wrappers.segmentation_wrapper import SegmentationWrapper
-from neverwhere.wrappers.splat_wrapper import SplatWrapper
-from neverwhere.wrappers.gsplat_wrapper import GSplatWrapper
 from neverwhere.wrappers.terrain_randomization_wrapper import TerrainRandomizationWrapper
 from neverwhere.wrappers.vision_wrapper import TrackingVisionWrapper
 from neverwhere.wrappers.pcd_wrapper import PointCloudWrapper
@@ -134,8 +132,10 @@ def entrypoint(
     # now we use gsplat's trainer, so we need to load the model in a different way
     # TODO(ziyu): in the future, we should unify the two ways of loading the model
     if scene_version == "neverwhere":
+        from neverwhere.wrappers.gsplat_wrapper import GSplatWrapper
         GS_wrapper = GSplatWrapper
     elif scene_version == "lucidsim":
+        from neverwhere.wrappers.splat_wrapper import SplatWrapper
         GS_wrapper = SplatWrapper
     else:
         raise ValueError(f"Unknown data version: {scene_version}")
@@ -240,12 +240,6 @@ def entrypoint(
             height=720,
             camera_id="ego-rgb",
         )
-        env = ACTObservationWrapper(
-            env,
-            image_key="render_depth",
-            img_memory_length = img_memory_length,
-            **kwargs,
-        )
         fill_masks = False
         if use_cones: # need seg and RGB
             env = SegmentationWrapper(
@@ -273,5 +267,13 @@ def entrypoint(
             fill_masks=fill_masks,
             **kwargs,
         )
+        env = ACTObservationWrapper(
+            env,
+            image_key="splat_rgb",
+            img_memory_length = img_memory_length,
+            **kwargs,
+        )
+    else:
+        raise ValueError(f"Unknown mode: {mode}")
 
     return env
