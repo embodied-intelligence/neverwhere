@@ -9,7 +9,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="assets/mit/gaps_grassy_courtyard_v2.obj">
+        <mesh name="mesh" file="real_scenes_lucidsim/gaps_grassy_courtyard_v2/meshes/gaps_grassy_courtyard_v2.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
@@ -44,27 +44,27 @@
         <light name="light_3" directional="true" ambient="0.01 0.01 0.01" diffuse="0.8 0.8 0.8" specular="0 0 0"
                castshadow="false" pos="-4 0.25 0.15" dir="0.2 0 -0.05" active="true"/>
         <body name="scene-group-2">
-            <body name="mesh" pos="1.759649564983671 0.005839492933505327 0.504756854167407"
+            <body name="mesh" pos="1.959649564983671 0.005839492933505327 0.504756854167407"
                   euler="1.5878720215226747 -1.5416517756884225 1.9049533609508583e-15">
                 <geom type="sdf" name="mesh_geom" mesh="mesh" material="mesh_material" friction="1.25 0.3 0.3">
                     <plugin instance="sdf"/>
                 </geom>
             </body>
-            <body name="step-1" pos="0.21 -0.05 -0.2132">
-                <geom name="box1_geom" type="box" size="0.6096 0.5 0.2032" material="mesh_material"/>
+            <body name="step-1" pos="-0.01 -0.05 -0.2132">
+                <geom name="box1_geom" type="box" size="1.0096 0.8 0.2032" material="mesh_material"/>
             </body>
-            <body name="step-2" pos="1.811 -0.05 -0.2132">
+            <body name="step-2" pos="2.011 -0.05 -0.2132">
                 <geom name="box2_geom" type="box" size="0.5334 0.5 0.2032" material="mesh_material"/>
             </body>
-            <!--            <body name="ground" pos="0 0 0">-->
-            <!--                <geom size="50.0 50.0 1" type="plane" material="groundplane" />-->
-            <!--            </body>-->
+            <body name="ground" pos="0 0 -0.4264">
+                <geom size="50.0 50.0 1" type="plane" material="groundplane"/>
+            </body>
         </body>
-        <body name="waypoint-0" mocap="true" pos="1.8224272871467109 0 0">
+        <body name="waypoint-0" mocap="true" pos="2.0224272871467109 0 0">
             <geom name="cone-0_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone"/>
             <geom name="cone-0_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone"/>
         </body>
-        <body name="waypoint-1" mocap="true" pos="3.3906326791163846 0.00023922530771564032 -0.40201692878380124">
+        <body name="waypoint-1" mocap="true" pos="4.0906326791163846 0.00023922530771564032 -0.40201692878380124">
             <geom name="cone-1_1" mesh="SM_TrafficCone_V0_4_0" material="M_TraficCone_Additional" class="traffic_cone"/>
             <geom name="cone-1_2" mesh="SM_TrafficCone_V0_4_1" material="M_TraficCone_Main" class="traffic_cone"/>
         </body>

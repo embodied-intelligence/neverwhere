@@ -9,7 +9,7 @@
     </visual>
     <asset>
         <material name="groundplane" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
-        <mesh name="mesh" file="/SSD2/chenziyu/neverwhere_data/real_scenes/real_stair_08_mc_afternoon_v1/meshes/real_stair_08_mc_afternoon_v1.obj">
+        <mesh name="mesh" file="real_scenes_lucidsim/hurdle_226_blue_carpet_v3/meshes/hurdle_226_blue_carpet_v3.obj">
             <plugin instance="sdf"/>
         </mesh>
         <material name="mesh_material" reflectance="0.5" rgba="0.2 0.2 0.2 1"/>
