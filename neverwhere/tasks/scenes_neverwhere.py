@@ -15,7 +15,7 @@ robot_list = ["go1", "go2"]
 mode_list = ["vision_depth_act", "heightmap_splat", "splat_rgb_act"]
 
 add_env(
-    env_id="Real-vision_rgb_act_10-gaps_grassy_courtyard_v2",
+    env_id="Neverwhere-go1-splat_rgb_act-lucidsim_gaps_grassy_courtyard_v2",
     entrypoint=lucidsim_entrypoint,
     kwargs=dict(
         check_contact_termination=True,
@@ -35,7 +35,7 @@ add_env(
 )
 
 add_env(
-    env_id="Real-vision_rgb_act_10-hurdle_226_blue_carpet_v3",
+    env_id="Neverwhere-go1-splat_rgb_act-lucidsim_hurdle_226_blue_carpet_v3",
     entrypoint=lucidsim_entrypoint,
     kwargs=dict(
         check_contact_termination=True,
