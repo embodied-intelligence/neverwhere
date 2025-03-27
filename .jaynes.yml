@@ -1,0 +1,147 @@
+version: 0
+verbose: false
+mounts:
+- !mounts.SSHCode &code_mount
+  local_path: .
+  local_tar: /tmp/{now:%Y-%m-%d}/{now:%H%M%S.%f}-dog-park.tar
+  host_path: "{secret.JYNS_HOME}/jaynes_mount/parkour/{now:%Y-%m-%d}/{now:%H%M%S.%f}-dog-park"
+  remote_tar: "{secret.JYNS_HOME}/jaynes_mount/parkour/{now:%Y-%m-%d}/{now:%H%M%S.%f}-dog-park.tar"
+  pypath: true
+  excludes: >-
+    --exclude='samples' --exclude='images' --exclude='videos' 
+    --exclude='figures' --exclude='results' --exclude='analysis' --exclude='*.ipynb'
+    --exclude='*__pycache__' --exclude='*.git' --exclude='*.gif'
+    --exclude='*.mp4' --exclude='*.idea' --exclude='*.egg-info' --exclude='*.pkl'
+    --exclude='*/logs/*'
+    --exclude="*.cache"
+    --exclude="*.jsonl"
+    --exclude='assets/robots/anymal_b'
+    --exclude='assets/robots/anymal_c'
+    --exclude='assets/robots/cassie'
+  compress: true
+- !mounts.SSHCode &code_mount_parkour
+  local_path: ../parkour
+  local_tar: /tmp/{now:%Y-%m-%d}/{now:%H%M%S.%f}-parkour.tar
+  host_path: "{secret.JYNS_HOME}/jaynes_mount/parkour/{now:%Y-%m-%d}/{now:%H%M%S.%f}-parkour"
+  remote_tar: "{secret.JYNS_HOME}/jaynes_mount/parkour/{now:%Y-%m-%d}/{now:%H%M%S.%f}-parkour.tar"
+  pypath: true
+  excludes: >-
+    --exclude='samples' --exclude='images' --exclude='videos' --exclude='datasets'
+    --exclude='figures' --exclude='results' --exclude='analysis' --exclude='*.ipynb'
+    --exclude='*__pycache__' --exclude='*.git'  --exclude='*.gif'
+    --exclude='*.mp4' --exclude='*.idea' --exclude='*.egg-info' --exclude='*.pkl'
+    --exclude='*/logs/*'
+    --exclude="*.cache"
+    --exclude='main_street'
+    --exclude='assets/robots/anymal_b'
+    --exclude='assets/robots/anymal_c'
+    --exclude='assets/robots/cassie'
+  compress: true
+- !mounts.S3Code
+    prefix: "s3://{secret.JYNS_AWS_S3_BUCKET}/jaynes-debug"
+    local_path: .
+    volume: jaynes-mounts
+    mount_path: /mnt/jaynes-mounts
+    sub_path: "{now:%Y-%m-%d}/{now:%H%M%S.%f}"
+    init_image: "episodeyang/jaynes"
+    init_image_pull_policy: "IfNotPresent"
+    pypath: true
+    # needed for credential-less access
+    acl: public-read
+    # needed for credential-less download
+    no_signin: true
+    excludes: >-
+      --exclude='*__pycache__' --exclude='*.git' --exclude='*.idea' --exclude='*.egg-info'
+      --exclude='*.pkl'
+    compress: true
+
+runners:
+  - !runners.Simple &ssh_runner
+    name: "parkour-{now:%H%M%S}-{RUN.count}"
+    # can use either /bin/sh, or /bin/bash --norc. Somehow making the
+    # process background affects the envs, even though the ~/.profile,
+    # ~/.bashrc, ~/.bash_profile are never sourced. Adding debugging
+    # printouts, even before the interactive break point, yiels no stdout
+    # output.
+#   shell: "screen -dm /bin/bash --norc"
+#   echo '{secret.JYNS_PASSWORD}' | renew
+    setup: |
+      echo '{secret.JYNS_PASSWORD}' | renew
+      source $HOME/.jaynes_bash
+      conda activate imagen
+      echo running inside `hostname`
+      export ML_LOGGER_ROOT=http://escher.csail.mit.edu:4000
+      export ZAKU_URI=http://escher.csail.mit.edu:8100
+      export MUJOCO_GL=egl
+      export DATASETS=/data/vision/phillipi/geyang/datasets
+      export LUCIDSIM_DATASETS=$DATASETS/lucidsim
+      export LUCIDSIM_EVAL_DATASETS={secret.LUCIDSIM_EVAL_DATASETS}
+    envs: LANG=utf-8 LC_CTYPE=en_US.UTF-8
+    pypath: "{mounts[0].host_path}:{mounts[1].host_path}"
+    work_dir: "{mounts[0].host_path}"
+  - !runners.Container
+    # node_selector: null
+    name: "jaynes-docker-demo-{now:%H%M%S}-{RUN.count}"
+    image: "episodeyang/pytorch"
+    image_pull_secret: "hcdockerhub"
+    envs: LANG=utf-8
+    # startup: yes | pip install jaynes ml-logger -q
+    pypath: "{mounts[0].container_path}"
+    workdir: "{mounts[0].container_path}"
+    ipc: host
+    cpu: 1
+    gpu: 1
+    gpu_type: "NVIDIA-GeForce-RTX-3090"
+    mem: 8Gi
+    mem_limit: 8Gi
+    volumes:
+    - name: jaynes-mounts
+      emptyDir:
+        medium: Memory
+    ttl_seconds_after_finished: 360
+  launch: !ENV
+    type: Kube
+    namespace: ece3d-vision   
+
+    
+modes:
+  imagen: &imagen_mode
+    mounts:
+    - *code_mount
+    - *code_mount_parkour
+    #  - *code_mount_weaver
+    runner: *ssh_runner
+    launch: !ENV
+      type: ssh
+      ip: "{secret.JYNS_HOST}"
+      username: "{secret.JYNS_USERNAME}"
+      password: "{secret.JYNS_PASSWORD}"
+      launch_dir: "{secret.JYNS_HOME}/jaynes_mount/{now:%Y-%m-%d}/{now:%H%M%S.%f}"
+  torch:
+    mounts:
+    - *code_mount
+    - *code_mount_parkour
+    #  - *code_mount_weaver
+    runner: !runners.Simple
+      name: "dogpark-{now:%H%M%S}-{RUN.count}"
+      setup: |
+        source $HOME/.jaynes_bash
+        conda activate torch
+        echo running inside `hostname`
+        export ML_LOGGER_ROOT=http://escher.csail.mit.edu:4000
+        export ZAKU_URI=http://escher.csail.mit.edu:8100
+        export MUJOCO_GL=egl
+        export DATASETS=/data/vision/phillipi/geyang/datasets
+        export LUCIDSIM_DATASETS=$DATASETS/lucidsim
+        export LUCIDSIM_EVAL_DATASETS={secret.LUCIDSIM_EVAL_DATASETS}
+      envs: LANG=utf-8 LC_CTYPE=en_US.UTF-8
+      pypath: "{mounts[0].host_path}:{mounts[1].host_path}"
+      work_dir: "{mounts[0].host_path}"
+    launch: !ENV
+      type: ssh
+      ip: "{secret.JYNS_HOST}"
+      username: "{secret.JYNS_USERNAME}"
+      password: "{secret.JYNS_PASSWORD}"
+      launch_dir: "{secret.JYNS_HOME}/jaynes_mount/{now:%Y-%m-%d}/{now:%H%M%S.%f}"
+
+run: *imagen_mode
